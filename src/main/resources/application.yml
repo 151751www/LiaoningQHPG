@@ -1,0 +1,15 @@
+spring:
+  #配置数据库连接
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://192.168.0.220\SQL2008R2;DatabaseName=辽宁省生态保护重大工程气候效应评估系统
+    username: sa
+    password: Zhwykj123
+server:
+  #接收参数时分配内存
+  max-http-header-size: 102400
+  port: 9888
+logging:
+  config: classpath:logback-spring.xml
+  file: logs/error.log
+
