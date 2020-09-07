@@ -48,7 +48,7 @@ public class DataMethodDaoImpl implements DataMethodDao {
             dnum=5;
         }
         StringBuilder sql=new StringBuilder();
-        sql.append("select substr(CONVERT(varchar(20), observe_date, 25),0,"+dnum+") as 时间,"+obsvName+" as 长序列 from "+SQLTableName );
+        sql.append("select SUBSTRING(CONVERT(varchar(20), observe_date, 25),0,"+dnum+") as 时间,"+obsvName+" as 长序列 from "+SQLTableName );
         sql.append(" where station_num='"+stationNum+"' and observe_date>='"+beginTime+"' and observe_date<='"+endTime+"'");
         sql.append(" and "+obsvName+" is not null ");
         sql.append(" order by observe_date asc");

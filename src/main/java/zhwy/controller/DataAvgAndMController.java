@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import zhwy.service.DataAvgAndMService;
 import zhwy.service.DataMethodService;
-import zhwy.service.MethodManager;
 import zhwy.util.Common;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -126,12 +124,23 @@ public class DataAvgAndMController {
             if (dt != null && dt.size() > 0)
             {
                 list=dataMethodService.getYanchangDataResult(dt);
-                result=(JSON.toJSON(list)).toString();
+                JSONArray jsonArray=new JSONArray();
+                JSONObject jsonObject;
+                for (int i=0;i<list.size();i++){
+                    jsonObject=new JSONObject();
+                    jsonObject.put("时间",list.get(i).get("时间"));
+                    jsonObject.put("长序列",list.get(i).get("长序列"));
+                    jsonObject.put("短序列",list.get(i).get("短序列"));
+                    jsonObject.put("短序列更正值",list.get(i).get("短序列更正值"));
+                    jsonArray.add(jsonObject);
+                }
+                result=jsonArray.toJSONString();
             }
         }
         catch (Exception e)
         {
             logger.error("历史序列订正延长查询失败"+e.getMessage());
+            e.printStackTrace();
             result="历史序列订正延长失败"+e.getMessage();
         }
 
@@ -226,10 +235,22 @@ public class DataAvgAndMController {
 
     })
     public String uploadLFile( MultipartFile file,String dataType) throws IOException {
+        JSONObject jsObject=new JSONObject();
         if(("时，日，年").indexOf(dataType)<0){
-            return "序列订正延长只支持小时数据，日数据，年数据";
+            jsObject.put("上传失败","序列订正延长只支持小时数据，日数据，年数据");
         }
-        return dataMethodService.getFileContent(file,"长序列",dataType) ;
+        if(file==null){
+            jsObject.put("上传失败","长序列文件null");
+        }
+        if(jsObject.size()==0){
+            String result=dataMethodService.getFileContent(file,"长序列",dataType);
+            if("上传文件格式不正确".equals(result)){
+                jsObject.put("上传失败",result);
+            }else{
+                jsObject.put("上传成功",result);
+            }
+        }
+        return jsObject.toJSONString() ;
     }
     @ApiOperation(value = "上传短序列", notes = "上传图片", httpMethod="POST" ,consumes="multipart/form-data")
     @PostMapping(value = "/uploadSFile")
@@ -240,36 +261,52 @@ public class DataAvgAndMController {
             @ApiImplicitParam(name = "stationNum", value = "长序列台站号(54236,54668)", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "obsvName", value = "长序列要素名称(tem_avg，tem_max，...)", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "file",value = "单个序列文件，",paramType = "formData",required = true,dataType = "file"),
-            @ApiImplicitParam(name = "sequenceL", value = "长序列([{\"时间\":\"1961-01-02\"长序列\": \"-220\"}, {\"时间\": \"1961-01-05\",\"长序列\": \"-195\" },...])", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sequenceL", value = "长序列([{\"时间\":\"1961-01-02\"长序列\": \"-220\"}, {\"时间\": \"1961-01-05\",\"长序列\": \"-195\" },...])", required = false, paramType = "query", dataType = "String")
 
 
     })
     public String uploadSFile(String timeType,String beginTime,String endTime,String stationNum,String obsvName, MultipartFile file,String sequenceL)  {
+        JSONObject jsObject=new JSONObject();
         String result="";
         List<Map<String,Object>> sequenceLlist;
         try {
-            sequenceL=URLDecoder.decode(sequenceL,"utf-8");
+
             if(sequenceL==null||sequenceL.equals("")){
                 sequenceLlist = dataMethodService.getXulieYanchangData(timeType, beginTime, endTime, stationNum, obsvName);
+                if(sequenceLlist.size()==0){
+                    jsObject.put("上传失败","请重新选择需要查询的一段时间的长序列，原查询结果为空");
+                    return jsObject.toJSONString();
+                }
             }else{
+                sequenceL=URLDecoder.decode(sequenceL,"utf-8");
                 sequenceLlist=common.getList(sequenceL,new String[]{"时间","长序列"});
-            }
-            if(sequenceLlist.size()==0){
-                return "请先选择需要查询的一段时间的长序列，或直接上传长序列文件";
+                if(sequenceLlist.size()==0){
+                    jsObject.put("上传失败","请重新上传长序列文件，原长序列文件为null");
+                    return jsObject.toJSONString();
+                }
             }
             if(("时，日，年").indexOf(timeType)<0){
-                return "序列订正延长只支持小时数据，日数据，年数据";
+                jsObject.put("上传失败","序列订正延长只支持小时数据，日数据，年数据");
+                return jsObject.toJSONString();
             }
             String sequenceS=dataMethodService.getFileContent(file,"短序列",timeType);
             List<Map<String,Object>> sequenceSlist=common.getList(sequenceS,new String[]{"时间","短序列"});
             List<Map<String,Object>>listResult=dataMethodService.getHeBingDataResult(sequenceLlist,sequenceSlist,timeType);
-            result=JSONArray.parseArray(JSON.toJSONString(listResult)).toJSONString();
+            if(listResult==null){
+                jsObject.put("上传失败","长序列结果集长度小于短序列结果集，无法做短序列订正延长，请重新查询或者上传长序列！");
+            }else if(listResult.size()>0){
+                if(listResult.get(0).get("error")!=null){
+                    jsObject.put("上传失败",listResult.get(0).get("error"));
+                }else{
+                    jsObject.put("上传成功",JSON.toJSONString(listResult));
+                }
+            }
         }catch (Exception e){
             logger.error("上传短序列失败"+e.getMessage());
-            result="上传短序列失败"+e.getMessage();
+            jsObject.put("上传失败","上传短序列失败"+e.getMessage());
+            return  jsObject.toJSONString();
         }
-
-        return  result;
+        return  jsObject.toJSONString();
     }
 
 }
