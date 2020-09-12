@@ -76,7 +76,7 @@ public class HuiTuService {
 					Double lat = Double.parseDouble(latLonJSON.getJSONObject(i).getString("lat"));
 //				Double value = Double.parseDouble(latLonJSON.getJSONObject(i).getString("风速"));
 					String strfx=latLonJSON.getJSONObject(i).getString("win_d");
-					String strfs=latLonJSON.getJSONObject(i).getString("win_s");
+					String strfs=latLonJSON.getJSONObject(i).getString("value");
 					Double fx=null,fs=null;
 					if(strfx.length()>0 && strfs.length()>0){
 						//风向
@@ -84,7 +84,7 @@ public class HuiTuService {
 						gs = new GisPoint("", lon, lat, fx);
 						listGisPoint_Fx.add(gs);
 						//风速
-						fs=Double.parseDouble(latLonJSON.getJSONObject(i).getString("win_s"));
+						fs=Double.parseDouble(latLonJSON.getJSONObject(i).getString("value"));
 						gs = new GisPoint("", lon, lat, fs);
 						listGisPoint_Fs.add(gs);
 					}

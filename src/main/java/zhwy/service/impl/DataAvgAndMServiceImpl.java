@@ -7,17 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import zhwy.dao.DataAvgAndMDao;
-import zhwy.datatable.DataColumn;
-import zhwy.datatable.DataTable;
-import zhwy.entity.ChongxianqiResult;
-import zhwy.entity.ReturnMessage;
-import zhwy.service.ChongXianQIService;
 import zhwy.service.DataAvgAndMService;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @Resource
@@ -74,7 +66,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         return  message;
     }
 
-    public String  ChongxianqiCanshu(String obsv,String num,String startYear,String endYear){
+   /* public String  ChongxianqiCanshu(String obsv,String num,String startYear,String endYear){
         ChongxianqiResult jsonResult=new ChongxianqiResult();
         List<Map<String,Object>>datelist=dataAvgAndMDao.getChongXianDate(obsv,num,startYear,endYear);
         List<Double> listValue=new ArrayList<Double>();
@@ -107,7 +99,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         return  json;
     }
 
-    /**
+    *//**
      *
      * @param rateStr X年一遇  逗号分隔
      * @param avgXC 修改的均值
@@ -115,7 +107,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
      * @param cs_CvC 修改后的 cs_Cv
      * @param shuju1 数据库查询到的数据
      * @return
-     */
+     *//*
     public String ChongxianqiChonghui(String rateStr,String avgXC,String cvC,String cs_CvC,String[] shuju1){
         ChongxianqiResult jsonResult=new ChongxianqiResult();
 
@@ -169,5 +161,5 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         String json = JSONObject.toJSONString(jsonResult);
         return json;
 
-    }
+    }*/
 }

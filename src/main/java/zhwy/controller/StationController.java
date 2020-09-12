@@ -20,8 +20,8 @@ import zhwy.util.Common;
 @RequestMapping("/Stations")
 public class StationController {
     private static Logger logger = LoggerFactory.getLogger(StationController.class);
-  /*  @Autowired
-    private Common common;*/
+    @Autowired
+    private Common common;
     @Autowired
     private StationService stationService;
 
@@ -32,9 +32,9 @@ public class StationController {
     })
     public String getCity(String stationType) {
 
-        String message = "";
+        String message;
         //跨域
-        //common.getCrossOrigin();
+        common.getCrossOrigin();
         try {
             if (stationType == null || stationType.equals("")) {
                 message = "台站类型不能为空！";
@@ -43,7 +43,6 @@ public class StationController {
             }
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("StationController 文件中市名加载失败：" + e);
             return "市名加载失败：" + e;
@@ -57,9 +56,9 @@ public class StationController {
             @ApiImplicitParam(name = "city", value = "市名", required = false, paramType = "query", dataType = "String")
     })
     public String getCounty(String stationType ,String city){
-        String message = "";
+        String message;
         //跨域
-     //   common.getCrossOrigin();
+        common.getCrossOrigin();
         try {
             if (stationType == null || stationType.equals("")) {
                 message = "台站类型不能为空！";
@@ -68,7 +67,6 @@ public class StationController {
             }
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("StationController 文件中县名加载失败：" + e);
             return "StationController 县名加载失败：" + e;
@@ -79,18 +77,17 @@ public class StationController {
     @PostMapping("/getStation")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "stationType", value = "台站类型（国家站，区域站）", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "city", value = "市名", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "cnty", value = "县名", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "city", value = "市名",  paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "cnty", value = "县名", paramType = "query", dataType = "String")
     })
     public String getRegStation(String stationType,String city ,String cnty){
-        String message = "";
+        String message;
         //跨域
-       // common.getCrossOrigin();
+        common.getCrossOrigin();
         try {
             message = stationService.getRegStation(stationType,city,cnty);
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("StationController 文件中台站名称加载失败：" + e);
             return "StationController 文件中台站名称加载失败：" + e;
@@ -103,9 +100,9 @@ public class StationController {
             @ApiImplicitParam(name = "areaType", value = "地区类型（市，县）", required = true, paramType = "query", dataType = "String")
     })
     public String getAreaCode(String areaName,String areaType ) {
-        String message = "";
+        String message ;
         //跨域
-       // common.getCrossOrigin();
+        common.getCrossOrigin();
         if(areaName==null||areaName.equals("")||areaType==null||areaType.equals("")){
             return "地区名称和类型不可为空" ;
         }
@@ -113,7 +110,6 @@ public class StationController {
             message = stationService.getAreaCode(areaName,areaType);
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("StationController 文件中地区编码加载失败：" + e);
             return "StationController 文件中地区编码加载失败：" + e;

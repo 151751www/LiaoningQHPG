@@ -2,27 +2,288 @@ package zhwy;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.math3.distribution.GammaDistribution;
+import org.apache.commons.math3.special.Gamma;
 import zhwy.util.Common;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.math3.special.Gamma;
 
 
 public class Json {
 
-   // public static void main(String[] args) {
+    public static Map<String,String> itemH =new HashMap<String,String>();
+    public static Map<String,String> itemD =new HashMap<String,String>();
+    public static Map<String,String> itemM =new HashMap<String,String>();
+    public static Map<String,String> itemY =new HashMap<String,String>();
 
-       /* String fullPath = null;
+
+    static {
+
+        itemH.put("prs", "气压");
+        itemH.put("prs_sea", "海平面气压");
+        itemH.put("prs_max", "最高气压");
+        itemH.put("prs_min", "最低气压");
+
+        itemH.put("tem", "气温");
+        itemH.put("tem_max", "最高气温");
+        itemH.put("tem_min", "最低气温");
+
+        itemH.put("dpt", "露点温度");
+        itemH.put("rhu", "相对湿度");
+        itemH.put("rhu_min", "最小相对湿度");
+
+        itemH.put("vap", "水汽压");
+        itemH.put("vap_min", "最小水汽压");
+
+
+        itemH.put("pre", "降水量");
+
+        itemH.put("evp_big", "大型蒸发量");
+
+        itemH.put("win_s_avg_2mi", "2分钟平均风速");
+        itemH.put("win_d_10mi", "10分钟平均风速");
+        itemH.put("win_s_max", "最大风速");
+        itemH.put("win_s_inst_max", "极大风速");
+        itemH.put("win_s_inst", "瞬时风速");
+
+        itemH.put("gst", "地面温度");
+        itemH.put("gst_max", "最高地面温度");
+        itemH.put("gst_min", "最低地面温度");
+        itemH.put("gst_5cm", "5cm地温");
+        itemH.put("gst_10cm", "10cm地温");
+        itemH.put("gst_15cm", "15cm地温");
+        itemH.put("gst_20cm", "20cm地温");
+        itemH.put("gst_40cm", "40cm地温");
+        itemH.put("gst_80cm", "80cm地温");
+        itemH.put("gst_160cm", "160cm地温");
+        itemH.put("gst_320cm", "320cm地温");
+
+        itemH.put("lgst", "草面（雪面）温度");
+        itemH.put("lgst_max", "草面（雪面）最高温度");
+        itemH.put("lgst_min", "草面（雪面）最低温度");
+
+
+        itemH.put("vis_hor_1mi", "1分钟平均水平能见度");
+        itemH.put("vis_hor_10mi", "10分钟平均水平能见度");
+        itemH.put("vis_min", "最小水平能见度");
+        itemH.put("vis", "定时能见度");
+
+        itemH.put("clo_cov", "总云量");
+        itemH.put("clo_cov_low", "低云量");
+        itemH.put("clo_cov_lm", "云量");
+        itemH.put("clo_height_lom", "云底高度");
+
+        itemH.put("snow_depth", "积雪深度");
+        itemH.put("snow_prs", "雪压");
+
+        itemH.put("frs_1st_top", "第1冻土层上界值");
+        itemH.put("frs_1st_bot", "第1冻土层下界值");
+        itemH.put("frs_2nd_top", "第2冻土层上界值");
+        itemH.put("frs_2nd_bot", "第2冻土层下界值");
+
+
+        itemD.put("prs_avg", "平均气压");
+        itemD.put("prs_max", "最高气压");
+        itemD.put("prs_min", "最低气压");
+        itemD.put("prs_sea_avg", "平均海平面气压");
+
+        itemD.put("tem_avg", "平均气温");
+        itemD.put("tem_max", "最高气温");
+        itemD.put("tem_min", "最低气温");
+
+        itemD.put("vap_avg", "平均水汽压");
+
+        itemD.put("rhu_avg", "平均相对湿度");
+        itemD.put("rhu_min", "最小相对湿度");
+
+        itemD.put("clo_cov_avg", "平均总云量");
+        itemD.put("clo_cov_low_avg", "平均低云量");
+
+        itemD.put("vis_min", "最小水平能见度");
+
+        itemD.put("pre_max_1h", "1小时最大降水量");
+        itemD.put("pre_time_2008", "20-08时降水量");
+        itemD.put("pre_time_0820", "08-20时降水量");
+        itemD.put("pre_time_2020", "20-20时降水量");
+        itemD.put("pre_time_0808", "08-08时降水量");
+
+        itemD.put("evp_small", "小型蒸发量");
+        itemD.put("evp_big", "大型蒸发量");
+
+        itemD.put("snow_depth", "积雪深度");
+        itemD.put("snow_prs", "雪压");
+
+        itemD.put("win_s_2mi_avg", "平均2分钟风速");
+        itemD.put("win_s_10mi_avg", "平均10分钟风速");
+        itemD.put("win_s_max", "最大风速");
+        itemD.put("win_s_inst_max", "极大风速");
+
+        itemD.put("gst_avg", "平均地面温度");
+        itemD.put("gst_max", "最高地面温度");
+        itemD.put("gst_min", "最低地面温度");
+
+        itemD.put("gst_avg_5cm", "平均5cm地温");
+        itemD.put("gst_avg_10cm", "平均10cm地温");
+        itemD.put("gst_avg_15cm", "平均15cm地温");
+        itemD.put("gst_avg_20cm", "平均20cm地温");
+        itemD.put("gst_avg_40cm", "平均40cm地温");
+        itemD.put("gst_avg_80cm", "平均80cm地温");
+        itemD.put("gst_avg_160cm", "平均160cm地温");
+        itemD.put("gst_avg_320cm", "平均320cm地温");
+
+        itemD.put("frs_1st_top", "第1冻土层上界值");
+        itemD.put("frs_1st_bot", "第1冻土层下界值");
+        itemD.put("frs_2nd_top", "第2冻土层上界值");
+        itemD.put("frs_2nd_bot", "第2冻土层下界值");
+        itemD.put("ssh", "日照时数");
+
+        itemD.put("lgst_avg", "草面（雪面）温度");
+        itemD.put("lgst_max", "草面（雪面）最高温度");
+        itemD.put("lgst_min", "草面（雪面）最低温度");
+
+
+        itemM.put("prs_avg", "平均气压");
+        itemM.put("prs_max", "最高气压");
+        itemM.put("prs_min", "最低气压");
+        itemM.put("prs_sea_avg", "平均海平面气压");
+
+        itemM.put("tem_avg", "平均气温");
+        itemM.put("tem_max", "最高气温");
+        itemM.put("tem_min", "最低气温");
+        itemM.put("tem_max_avg","平均最高气温");
+        itemM.put("tem_min_avg","平均最低气温");
+
+        itemM.put("vap_avg", "平均水汽压");
+
+        itemM.put("rhu_avg", "平均相对湿度");
+        itemM.put("rhu_min", "最小相对湿度");
+
+        itemM.put("clo_cov_avg", "平均总云量");
+        itemM.put("clo_cov_low_avg", "平均低云量");
+
+        itemM.put("vis_min", "最小水平能见度");
+
+        itemM.put("pre_max_1h", "1小时最大降水量");
+        itemM.put("pre_max_day","最大日降水量");
+        itemM.put("pre_conti_max","最长连续降水量");
+        itemM.put("pre_max_conti","最大连续降水量");
+        itemM.put("pre_time_2020", "20-20时降水量");
+        itemM.put("pre_time_0808", "08-08时降水量");
+
+        itemM.put("evp","蒸发量");
+        itemM.put("evp_big", "大型蒸发量");
+
+        itemM.put("snow_depth_max", "最大积雪深度");
+        itemM.put("snow_prs", "雪压");
+
+        itemM.put("eice_wei_max","电线积冰最大重量");
+        itemM.put("eicew_max_diam","电线积冰最大重量的相应直径");
+        itemM.put("eicew_max_thick","电线积冰最大重量的相应厚度");
+
+        itemM.put("win_s_2mi_avg", "平均2分钟风速");
+        itemM.put("win_s_max", "最大风速");
+        itemM.put("win_s_inst_max", "极大风速");
+
+        itemM.put("gst_avg", "平均地面温度");
+        itemM.put("egst_max_avg_mon","月平均最高地面温度");
+        itemM.put("gst_min_avg","月平均最低地面温度");
+        itemM.put("gst_max", "最高地面温度");
+        itemM.put("gst_min", "最低地面温度");
+
+        itemM.put("gst_avg_5cm", "平均5cm地温");
+        itemM.put("gst_avg_10cm", "平均10cm地温");
+        itemM.put("gst_avg_15cm", "平均15cm地温");
+        itemM.put("gst_avg_20cm", "平均20cm地温");
+        itemM.put("gst_avg_40cm", "平均40cm地温");
+        itemM.put("gst_avg_80cm", "平均80cm地温");
+        itemM.put("gst_avg_160cm", "平均160cm地温");
+        itemM.put("gst_avg_320cm", "平均320cm地温");
+
+        itemM.put("frs_depth_max","最大冻土深度");
+
+        itemM.put("ssh", "日照时数");
+
+        itemM.put("lgst_avg", "草面（雪面）温度");
+        itemM.put("lgst_max_avg", "平均最高草面(雪面)温度");
+        itemM.put("lgst_min_avg", "平均最低草面(雪面)温度");
+        itemM.put("lgst_max", "草面（雪面）最高温度");
+        itemM.put("lgst_min", "草面（雪面）最低温度");
+
+
+
+        itemY.put("prs_avg", "平均气压");
+        itemY.put("prs_max", "最高气压");
+        itemY.put("prs_min", "最低气压");
+
+        itemY.put("tem_avg", "平均气温");
+        itemY.put("tem_avg_max", "年均最高气温");
+        itemY.put("tem_avg_min", "年均最低气温");
+        itemY.put("tem_max", "年极端最高气温");
+        itemY.put("tem_min", "年极端最低气温");
+
+        itemY.put("vap_avg", "平均水汽压");
+        itemY.put("vap_max", "最大水汽压");
+        itemY.put("vap_min", "最小水汽压");
+
+
+        itemY.put("rhu_avg", "平均相对湿度");
+        itemY.put("rhu_min", "最小相对湿度");
+
+        itemY.put("clo_cov_avg", "年均总云量");
+        itemY.put("clo_cov_low_avg", "年均低云量");
+
+
+        itemY.put("pre_1m", "年降水量");
+
+
+        itemY.put("evp_small", "小型蒸发量");
+        itemY.put("evp_big", "大型蒸发量");
+
+        itemY.put("snow_depth_max", "年最大积雪深度");
+
+        itemY.put("win_s_2mi_avg", "平均2分钟风速");
+        itemY.put("win_s_10mi_avg", "平均10分钟风速");
+        itemY.put("win_s_max", "最大风速");
+        itemY.put("win_s_inst_max", "极大风速");
+        itemY.put("win_s_tim", "定时风速");
+
+        itemY.put("gst_avg", "平均地面温度");
+        itemY.put("gst_avg_max","年均最高地面温度");
+        itemY.put("gst_avg_min","年均最低地面温度");
+        itemY.put("gst_max", "年极端最高地面温度");
+        itemY.put("gst_min", "年极端最低地面温度");
+
+        itemY.put("gst_avg_5cm", "平均5cm地温");
+        itemY.put("gst_avg_10cm", "平均10cm地温");
+        itemY.put("gst_avg_15cm", "平均15cm地温");
+        itemY.put("gst_avg_20cm", "平均20cm地温");
+        itemY.put("gst_avg_40cm", "平均40cm地温");
+        itemY.put("gst_avg_80cm", "平均80cm地温");
+        itemY.put("gst_avg_160cm", "平均160cm地温");
+        itemY.put("gst_avg_320cm", "平均320cm地温");
+
+        itemY.put("frs_depth_max", "最大冻土深度");
+
+        itemY.put("ssh", "日照时数");
+
+    }
+
+
+
+    /*public static void main(String[] args) {
+
+        String fullPath = null;
         //例如：fullPath="D:/myroot/test.json"
 
         // 生成json格式文件
         try {
             // 保证创建一个新文件
-            File file = new File("E:\\json文件测试\\Obsvelement");
+            File file = new File("E:\\json文件测试\\Obsvelement2");
             if (!file.getParentFile().exists()) { // 如果父目录不存在，创建父目录
                 file.getParentFile().mkdirs();
             }
@@ -39,47 +300,53 @@ public class Json {
             String [] monthKey={"prs","vap","tem","rhu","clo","vis","pre","evp","win","gst","lgst","frs","snow","ssh"};
             String [] yearObsv={"气压","水汽压","气温","相对湿度","云","降水量","蒸发量","风","地温","冻土","雪深","日照"};
             String [] yearKey={"prs","vap","tem","rhu","clo","pre","evp","win","gst","frs","snow","ssh"};
+
             Common common=new Common();
             Map<String,String> obsvMap=null;
-            JSONObject rootH = new JSONObject();
-            JSONObject rootD = new JSONObject();
-            JSONObject rootM = new JSONObject();
-            JSONObject rootY = new JSONObject();
-            JSONObject root1 = new JSONObject();
+            JSONObject rootH = new JSONObject(true);
+            JSONObject rootD = new JSONObject(true);
+            JSONObject rootM = new JSONObject(true);
+            JSONObject rootY = new JSONObject(true);
+            JSONObject root1 = new JSONObject(true);
             String [][]arrObsv={hourObsv,dayObsv,monthObsv,yearObsv};
             String [][]arrkey={hourKey,dayKey,monthKey,yearKey};
+
             for (int j=0;j<arrObsv.length;j++){
                 String[] obsv=arrObsv[j];
                 String [] zrrkey=arrkey[j];
                 if(j==0){
-                    obsvMap=common.itemH;
+                    obsvMap=itemH;
                 }else if(j==1){
-                    obsvMap=common.itemD;
+                    obsvMap=itemD;
                 }else if(j==2){
-                    obsvMap=common.itemM;
+                    obsvMap=itemM;
                 }else if(j==3){
-                    obsvMap=common.itemY;
+                    obsvMap=itemY;
                 }
                 for (int i=0;i<obsv.length;i++){
                     JSONArray array = new JSONArray();
+                    JSONObject obsvObject=new JSONObject(true);
                     String obsvKey=zrrkey[i];
                     for (Map.Entry<String,String>entry:obsvMap.entrySet()){
                         String key=entry.getKey();
                         if(key.startsWith(obsvKey)){
-                            JSONObject  jsonObject=new JSONObject();
+                            JSONObject  jsonObject=new JSONObject(true);
                             jsonObject.put("val",entry.getKey());
                             jsonObject.put("name",entry.getValue());
                             array.add(jsonObject);
                         }
                     }
+                    obsvObject.put("value",obsvKey);
+                    obsvObject.put("label",obsv[i]);
+                    obsvObject.put("children",array);
                     if(j==0){
-                        rootH.put(obsv[i],array);
+                        rootH.put(obsv[i],obsvObject);
                     }else if(j==1){
-                        rootD.put(obsv[i],array);
+                        rootD.put(obsv[i],obsvObject);
                     }else if(j==2){
-                        rootM.put(obsv[i],array);
+                        rootM.put(obsv[i],obsvObject);
                     }else if(j==3){
-                        rootY.put(obsv[i],array);
+                       rootY.put(obsv[i],obsvObject);
                     }
                 }
             }
@@ -100,31 +367,43 @@ public class Json {
             write.close();
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
-   // }
+        }
+    }*/
     public static void main(String[] args) {
-        //直接利用这个可以求gamma函数的一阶偏导数
-        double cc= Gamma.digamma(1);
-        double a = Math.pow(Math.PI,2)/6.0+Math.pow(cc,2);
-        System.out.println(a);
-        System.out.println(Sencondderivative(1));
-        //getGammaInv();
-    }
-    public static double Firstderivative(double x) {
-        double Firstgamm=Gamma.gamma(x)*Gamma.digamma(x);
-        return Firstgamm;
-    }
-    public static double Sencondderivative(double x){
-        double Sencondgamm=(Math.pow(Firstderivative(x)/Gamma.gamma(x),2)+Gamma.trigamma(x))*Gamma.gamma(x);
-        return Sencondgamm;
+
+        System.out.println(getGammaInv(161.7));
+        System.out.println(getGammaInv(137.8));
     }
 
-    public static  double getGammaInv(double x,double avgx,double cv,double cs){
-        double  a=4/Math.pow(cs,2);
-        double b=2/(avgx*cv*cs);
-        double a0=avgx*(1-((2*cv)/cs));
-        double y=(Math.pow(b,a)/Sencondderivative(a))*Math.pow(x-a0,a-1)*(1/Math.pow(Math.E,b*(x-a0)));
+    public static  double getGammaInv(double x){
+        double  a=2.1786195721735817;
+        double b=0.053036345708270725;
+        double a0=23.047140221402216;
+        double ad=Math.pow(b,a);
+        double gamma1=Gamma.gamma(a);
+        System.out.println("gamma1:"+gamma1);
+        double d1=Math.pow(b,a)/gamma1;
+        double d2=Math.pow(x-a0,a-1);
+        double d3=(Math.pow(Math.E,1/b*(x-a0)));
+        double y=d1*d2*d3;
        return  y;
+    }
+    public static double gamma(double x, double setAbsRelaErr) {
+        x -= 1;
+        double res = 0.0;
+        int i = 1;
+        double temp = 1.0;
+        double temp0 = 1.0;
+        double temp1 = 1.0;
+        temp = 1 / (x + 1);
+        do {
+            temp0 = temp * Math.pow(i, x);
+            i++;
+            temp *= i / (x + i);
+            temp1 = temp * Math.pow(i, x);
+        }while(Math.abs(temp1 - temp0) > 0.00001);
+        res = temp1;
+        return res;
     }
     /**
      * 返回格式化JSON字符串。
