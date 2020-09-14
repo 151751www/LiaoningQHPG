@@ -9,11 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import zhwy.service.TaskManagementService;
-import zhwy.util.WinTaskUtil;
-
-import java.io.File;
 
 @RestController(value="/tasks")
 @Api(value = "/taskManagement",tags = {"任务计划管理"})
