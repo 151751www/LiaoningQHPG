@@ -160,7 +160,7 @@ public class MakeGradsFile {
 
         int x = MaxLon.subtract(MinLon).divide(step).intValue() + 1;  //134    135
         int y = MaxLat.subtract(MinLat).divide(step).intValue() + 1;  //145    147
-        boolean isSuccess= getTxt(latLonJSON,time,"lon","lat","win_s");
+        boolean isSuccess= getTxt(latLonJSON,time,"lon","lat","value");
         //写grd文件
         String grdGrdPath=saveFolder + "grdGrd"+time+".grd";
         File file=new File(grdGrdPath);

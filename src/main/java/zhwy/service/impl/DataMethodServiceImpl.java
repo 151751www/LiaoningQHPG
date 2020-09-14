@@ -13,10 +13,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Resource
@@ -24,23 +21,23 @@ public class DataMethodServiceImpl implements DataMethodService {
     private static Logger logger = LoggerFactory.getLogger(StationServiceImpl.class);
     @Autowired
     public DataMethodDao dataMethodDao;
-    public List<Map<String,Object>> getXulieYanchangData(String timeType, String beginTime, String endTime, String stationNum, String obsvName) throws Exception {
-        return dataMethodDao.getXulieYanchangData(timeType,beginTime,endTime,stationNum,obsvName);
+    public List<Map<String,Object>> getXulieYanchangData(String stationType,String timeType, String beginTime, String endTime, String stationNum, String obsvName,String name,String tiaojian) throws Exception {
+        return dataMethodDao.getXulieYanchangData(stationType,timeType,beginTime,endTime,stationNum,obsvName,name,tiaojian);
     }
 
     public  List<Map<String,Object>> getYanchangDataResult(List<Map<String,Object>> dtData)throws Exception
     {
         List<Map<String,Object>> dtResult = null;
-        //try {
+        /*try {*/
             double[] arrLongValue = new double[dtData.size()];
             ArrayList<Double> listValue = new ArrayList<Double>();
             for (int i = 0; i < dtData.size(); i++)
             {
-                double longxulie= Double.parseDouble((String)dtData.get(i).get("长序列")) ;
+                double longxulie= Double.parseDouble(String.valueOf(dtData.get(i).get("长序列"))) ;
                 arrLongValue[i] = longxulie;
-                if (dtData.get(i).get("短序列")!=null&&!String.valueOf(dtData.get(i).get("短序列")).equals(""))
+                if (dtData.get(i).get("短序列")!=null&&!String.valueOf(dtData.get(i).get("短序列")).equals("")&&!String.valueOf(dtData.get(i).get("短序列")).equals("-"))
                 {
-                    listValue.add(Double.parseDouble((String)dtData.get(i).get("短序列")));
+                    listValue.add(Double.parseDouble(String.valueOf(dtData.get(i).get("短序列"))));
                 }
             }
             Object[] arrShortValue = listValue.toArray();
@@ -86,12 +83,17 @@ public class DataMethodServiceImpl implements DataMethodService {
                     if(dtData.get(i).get("短序列")==null){
                         dtResult.get(i).put("短序列","-");
                     }
-                    Double duanXuLie=(Double.parseDouble((String) dtResult.get(i).get("长序列"))) * k + a;
-                    BigDecimal b = new BigDecimal(duanXuLie);
-                    dtResult.get(i).put("短序列更正值",b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    Double duanXuLie=(Double.parseDouble(String.valueOf( dtResult.get(i).get("长序列")))) * k + a;
+                    BigDecimal b =null;
+                    try {
+                        b= new BigDecimal(duanXuLie);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    dtResult.get(i).put("短序列订正值",b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
                 }
             }
-       /* }catch (Exception e){
+        /*}catch (Exception e){
             logger.error("DataMethodServiceImpl----- getYanchangDataResult 短序列订正延长报错"+e);
             e.printStackTrace();
         }*/
@@ -121,13 +123,24 @@ public class DataMethodServiceImpl implements DataMethodService {
             for (int i=0;i<LData.size();i++){
                 Object duanxulie=null;
                 for (int s=0;s<SData.size();s++){
+                    String ld= (String) LData.get(i).get("时间");
+                    String sd= (String) SData.get(s).get("时间");
                     if(LData.get(i).get("时间").equals(SData.get(s).get("时间"))){
                         duanxulie=SData.get(s).get("短序列");
                         break;
                     }
                 }
-                LData.get(i).put("短序列",duanxulie);
+                if(duanxulie!=null){
+                    LData.get(i).put("短序列",duanxulie);
+                }else {
+                    LData.get(i).put("短序列","-");
+                }
+                LData.get(i).put("站号",SData.get(0).get("站号"));
+                LData.get(i).put("要素",SData.get(0).get("要素"));
+
             }
+        }else{
+            LData.get(0).put("error","长序列数据集时间和短序列数据集时间不匹配，请重新选择或上传包含短序列时间段的长序列数据集！");
         }
         return LData;
     }
@@ -143,6 +156,13 @@ public class DataMethodServiceImpl implements DataMethodService {
             e.printStackTrace();
         }
         return result;
+    }
+    public String saveDuanxulie(List<Map<String,Object>> list,String dateType){
+        return  dataMethodDao.saveDuanxulie(list,dateType);
+    }
+
+    public String getXulieDingZheng(String timeType, String beginTime, String endTime, String stationNum, String obsvName){
+        return  dataMethodDao.getXulieDingZheng(timeType,beginTime,endTime,stationNum,obsvName);
     }
 
 

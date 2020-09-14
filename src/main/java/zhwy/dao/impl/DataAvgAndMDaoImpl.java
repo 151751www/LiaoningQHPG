@@ -1,7 +1,6 @@
 package zhwy.dao.impl;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +10,7 @@ import zhwy.util.Common;
 import zhwy.util.GeneralDaoImpl;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Component
@@ -23,8 +21,8 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
     @Autowired
     private Common common;
 
-    String [] obsv={"气温","气压","水汽压","相对湿度","能见度","降水量","蒸发","积雪深度","风速","温度","地度","界值","雪压"};
-    String [] danwei={"℃","hPa","hPa","%","m","mm","mm","cm","m/s","℃","℃","cm","kg/m²"};
+    String [] obsv={"气温","气压","水汽压","相对湿度","能见度","降水量","蒸发","积雪深度","风速","温度","地温","地面温度","界值","雪压"};
+    String [] danwei={"℃","hPa","hPa","%","m","mm","mm","cm","m/s","℃","℃","℃","cm","kg/m²"};
 
     public String DataForAvg(String stationType,String dataType, String key,String value, String StartTime,String EndTime, String city,String stationNum,String suanfaType,String cnty){
 
@@ -310,6 +308,8 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         }
         return  datelist;
     }
+
+
 
 
 }

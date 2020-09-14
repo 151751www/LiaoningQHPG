@@ -59,7 +59,6 @@ public class UserInfoController {
 
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("UserInfoController ---addUser  新增用户失败：" + e);
             return "新增用户失败：" + e;
@@ -96,7 +95,6 @@ public class UserInfoController {
 
             return message;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("UserInfoController ---updateUser  修改用户失败：" + e);
             return "修改用户失败：" + e;
@@ -115,7 +113,6 @@ public class UserInfoController {
             String[] arr={"用户名","姓名","手机","电话"};
             message=userInfoService.selectUser(userName,arr);
         }catch (Exception e){
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("UserInfoController ---selectUser  查询用户失败：" + e);
             return "查询用户失败：" + e;
@@ -139,7 +136,6 @@ public class UserInfoController {
             }
 
         }catch (Exception e){
-            // TODO Auto-generated catch block
             e.printStackTrace();
             logger.error("UserInfoController ---selectUser  删除用户失败：" + e);
             return "删除用户失败：" + e;

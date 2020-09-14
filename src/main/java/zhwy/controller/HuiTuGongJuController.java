@@ -6,22 +6,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.catalina.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import zhwy.service.HuiTuService;
 import zhwy.util.Common;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 
 @Api(position = 8,tags = "绘图工具")
 @RestController
@@ -47,12 +41,12 @@ public class HuiTuGongJuController {
 
 		//跨域
 		common.getCrossOrigin();
-		String picName="";
+		String picName;
 		String[] arr= area.split("\\|");
 		int length=arr.length;
 		colorStr= URLDecoder.decode(colorStr,"utf-8");
 		latLonStr=URLDecoder.decode(latLonStr,"utf-8");
-		JSONArray json = null;
+		JSONArray json ;
 		try {
 			if(length!=4){
 				picName="经纬度范围不合理，请输入正确的经纬度范围，如：117.9677|126.6426|37.0619|45.2370";
@@ -62,7 +56,6 @@ public class HuiTuGongJuController {
 			}
 			return   picName;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			logger.error("生成图片失败："+e.getMessage());
 			return "生成图片失败："+e.getMessage();
