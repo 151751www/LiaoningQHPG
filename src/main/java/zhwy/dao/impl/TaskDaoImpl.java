@@ -53,9 +53,9 @@ public class TaskDaoImpl implements TaskDao {
         String result="";
         try {
             //先查询任务计划是否已存在
-            String sql="select name from task_info where name='"+task.getName()+"'";
+            String sql="select count(*) as num from task_info where name='"+task.getName()+"'";
             Map<String,Object> map=generalDao.getDataMap(sql);
-            if(map!=null&&map.size()>0){
+            if((int)map.get("num")!=0){
                 result="已存在该任务计划！";
             }else{
                 Object [] arr={task.getName(),task.getState(),task.getLastTime(),task.getNextTime(),task.getPlanFre(),

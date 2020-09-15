@@ -34,8 +34,6 @@ public class FileUtil {
         String [] fileArr=fileName.split(".");
         if(fileName.endsWith(".jar")){
             cmd="java -jar "+fileName;
-        }else if(fileName.endsWith(".py")){
-
         }
         OutputStream out=null;
         fileName=fileName.substring(0,fileName.indexOf("."))+"Task.bat";

@@ -40,7 +40,14 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                     stopTime=sdf.format(cal.getTime());
                 }
                 System.out.println(WinTaskUtil.getSetFileDir());
-                path=WinTaskUtil.getSetFileDir().replace("/","\\")+"task";
+                //path=WinTaskUtil.getSetFileDir().replace("/","\\")+"task";
+                //暂时按照jar包路径获取统计目录
+                path=WinTaskUtil.getSetFileDir().replace("/","\\");
+                path=path.substring(path.indexOf("\\")+1);
+                if(path.indexOf("!")!=-1){
+                    path=path.substring(0,path.indexOf("!"));
+                    path=path.substring(0,path.lastIndexOf("\\"))+"\\task";
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,7 +56,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
         if(!"".equals(file.getOriginalFilename())){
             FileUtil.saveFile(file,path);
             //做runTask.bat执行用户上传的jar,py
-            if(file.getOriginalFilename().endsWith(".jar")||file.getOriginalFilename().endsWith(".py")){
+            if(file.getOriginalFilename().endsWith(".jar")){
                 fileName=FileUtil.createBat(file.getOriginalFilename(),path);
             }else{
                 fileName=file.getOriginalFilename();
