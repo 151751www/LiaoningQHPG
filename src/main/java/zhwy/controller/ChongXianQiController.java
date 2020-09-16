@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.math3.distribution.GammaDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,16 +100,20 @@ public class ChongXianQiController {
     @ApiOperation(value = "重现期查询")
     @PostMapping(value = "/getDataForChongxianqi")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "yearData", value = "各年极值([{\"时间\":\"1951\",\"年值\":\"11.7\"},{\"时间\":\"1952\",\"年值\":\"12\"},{\"时间\":\"1953\",\"年值\":\"12\"},...])", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "yearData", value = "各年极值([{\"时间\":\"1951\",\"年值\":\"11.7\"},{\"时间\":\"1952\",\"年值\":\"12\"},{\"时间\":\"1953\",\"年值\":\"12\"},...])", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "suanfaType", value = "算法类型（耿贝尔分布法，皮尔逊Ⅲ分布法）", required = true, paramType = "query", dataType = "String")
+
     })
-    public String getDataForChongxianqi( String  yearData,String obsvName)  {
-        String result;
+    public String getDataForChongxianqi( String  yearData,String obsvName,String suanfaType)  {
+        String result = null;
         JSONObject jsonObject=new JSONObject();
         //跨域
         common.getCrossOrigin();
         List<Map<String,Object>> data=common.getList(yearData,new String[]{"时间","年值"});
         try {
-            result =chongXianQIService.getChongXianQiForgumbel(data,obsvName);
+            if(suanfaType.equals("耿贝尔分布法")){
+                result =chongXianQIService.getChongXianQiForgumbel(data,obsvName);
+            }
             jsonObject.put("重现期计算成功",result);
         }catch (Exception e){
             logger.error("ChongXianQiController---getDataForChongxianqi   计算重现期失败："+e.getMessage());
@@ -139,6 +144,10 @@ public class ChongXianQiController {
             double b=chongXianQIService.GetValue_b(map.get("avgx"),map.get("Cs"),map.get("Cv"));
             double a0=chongXianQIService.GetValue_a0(map.get("avgx"),map.get("Cs"),map.get("Cv"));
             double gama=Gamma.gamma(a);
+            Gamma.invGamma1pm1(gama);
+
+            System.out.println(Gamma.GAMMA);
+
             jsonObject.put("avgx",map.get("avgx"));
             jsonObject.put("Cv",map.get("Cv"));
             jsonObject.put("Cs_Cv",map.get("Cs_Cv"));

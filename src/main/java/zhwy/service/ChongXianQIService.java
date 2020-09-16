@@ -44,7 +44,7 @@ public class ChongXianQIService {
             bg= new BigDecimal(pmx);
             x_xp[i]=-Math.log(-Math.log(pmx));
             y_xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            x_year[i]= (int) (pmx*100);
+            x_year[i]= (int) (1/pmx);
         }
         double[] x=li;
         double[]temp=BubbleSort(x,"asc");
@@ -80,6 +80,7 @@ public class ChongXianQIService {
         double[] xp=new double[pm.length];
         for (int i=0; i<pm.length;i++){
             xp[i]=u-a*Math.log(-Math.log(pm[i]));
+            //xp[i]=u-a*Math.log(-Math.log(1-pm[i]));
             bg= new BigDecimal(xp[i]);
             xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
@@ -105,10 +106,10 @@ public class ChongXianQIService {
                 continue;
             }
         }
-        JSONObject  jsonObject=new JSONObject();
+        JSONObject  jsonObject=new JSONObject(true);
+        jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
-        jsonObject.put("单位",odanwei);
      return  jsonObject.toJSONString();
 
     }
