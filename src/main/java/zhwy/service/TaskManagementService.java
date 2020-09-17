@@ -1,6 +1,7 @@
 package zhwy.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface TaskManagementService {
@@ -13,11 +14,11 @@ public interface TaskManagementService {
      * @param operationType 操作类型：add,delete,update,run,runNow等
      * @return OK
      */
-    JSONArray taskManagement(String taskName,String newName, String startTime,String stopTime, String repeatInterval, String dateType, String operationType, MultipartFile file);
+    JSONArray taskManagement(String taskName,String type,String newName, String startTime,String stopTime, String repeatInterval, String dateType, String operationType, MultipartFile file);
     /**
      * 查询所有任务计划
      * @return JSONArray
      */
-    JSONArray selectTasks();
+    JSONObject selectTasks();
 
 }

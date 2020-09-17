@@ -16,7 +16,7 @@ public class TaskDaoImpl implements TaskDao {
     private GeneralDaoImpl generalDao;
 
     @Override
-    public JSONArray selectTasks(String taskName) {
+    public JSONArray selectTasks(String taskName,String type) {
         JSONArray array=new JSONArray();
         String name="";
         if(!"".equals(taskName)){
@@ -31,7 +31,9 @@ public class TaskDaoImpl implements TaskDao {
             sb.append(")");
             name=" and name in "+sb.toString();
         }
-
+        if(!"".equals(type)){
+            name=name+" and type='"+type+"' ";
+        }
         String sql="select name,state,CONVERT (VARCHAR(100), lastTime, 20) AS lastTime," +
                 "CONVERT (VARCHAR(100), nextTime, 20) AS nextTime ,planFre,\n" +
                 "CONVERT (VARCHAR(100), beginTime, 20) AS beginTime,CONVERT (VARCHAR(100), stopTime, 20) AS stopTime," +
@@ -58,12 +60,12 @@ public class TaskDaoImpl implements TaskDao {
             if((int)map.get("num")!=0){
                 result="已存在该任务计划！";
             }else{
-                Object [] arr={task.getName(),task.getState(),task.getLastTime(),task.getNextTime(),task.getPlanFre(),
+                Object [] arr={task.getName(),task.getType(),task.getState(),task.getLastTime(),task.getNextTime(),task.getPlanFre(),
                         task.getBeginTime(),task.getStopTime(),task.getDataTime(),task.getExec(),task.getIsstart(),
                         task.getIsdisable()};
-                sql="insert into task_info (name,state,lastTime,nextTime,planFre,beginTime,stopTime,dataTime,execScript," +
+                sql="insert into task_info (name,type,state,lastTime,nextTime,planFre,beginTime,stopTime,dataTime,execScript," +
                         "isstart,isdisable) " +
-                        "values (?,?,?,?,?,?,?,?,?,?,?)";
+                        "values (?,?,?,?,?,?,?,?,?,?,?,?)";
                 int num=generalDao.updateSql(sql,arr);
                 if(num>0){
                     result="OK";
@@ -113,14 +115,14 @@ public class TaskDaoImpl implements TaskDao {
                 "isstart","isdisable"};
         StringBuffer sb=new StringBuffer("update task_info set ");
         int j=0;
-        for(int i=0;i<arrStr.length;i++){
-            if(list.get(j)!=null && !"".equals(list.get(j))){
-                if(j!=0){
+        for (String s : arrStr) {
+            if (list.get(j) != null && !"".equals(list.get(j))) {
+                if (j != 0) {
                     sb.append(",");
                 }
-                sb.append(arrStr[i]).append("=?");
+                sb.append(s).append("=?");
                 j++;
-            }else{
+            } else {
                 list.remove(j);
             }
         }
@@ -151,5 +153,17 @@ public class TaskDaoImpl implements TaskDao {
             e.printStackTrace();
         }
         return exec;
+    }
+
+    @Override
+    public List<Map<String,Object>> selectType() {
+        List<Map<String,Object>> mapList=null;
+        String sql="select distinct type from task_info";
+        try{
+            mapList=generalDao.getDataList(sql);
+        }catch (Exception e ){
+            e.printStackTrace();
+        }
+        return mapList;
     }
 }

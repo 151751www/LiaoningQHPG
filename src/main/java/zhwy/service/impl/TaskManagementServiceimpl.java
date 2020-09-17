@@ -10,10 +10,9 @@ import zhwy.entity.Task;
 import zhwy.service.TaskManagementService;
 import zhwy.util.FileUtil;
 import zhwy.util.WinTaskUtil;
-
-import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.*;
 
 @Service
 public class TaskManagementServiceimpl  implements TaskManagementService {
@@ -24,7 +23,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
      * 方案：根据需求生成xml任务计划文件，通过schtasks /create 导入
      */
     @Override
-    public JSONArray taskManagement(String taskName,String newName, String startTime,String stopTime,
+    public JSONArray taskManagement(String taskName,String type,String newName, String startTime,String stopTime,
                                     String repeatInterval, String dateType, String operationType, MultipartFile file) {
         String result="";
         String path=null;
@@ -44,7 +43,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                 //暂时按照jar包路径获取统计目录
                 path=WinTaskUtil.getSetFileDir().replace("/","\\");
                 path=path.substring(path.indexOf("\\")+1);
-                if(path.indexOf("!")!=-1){
+                if(path.contains("!")){
                     path=path.substring(0,path.indexOf("!"));
                     path=path.substring(0,path.lastIndexOf("\\"))+"\\task";
                 }
@@ -52,11 +51,14 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                 e.printStackTrace();
             }
         }
+        if("".equals(type)){
+            type="0";
+        }
         //保存文件
         if(!"".equals(file.getOriginalFilename())){
             FileUtil.saveFile(file,path);
             //做runTask.bat执行用户上传的jar,py
-            if(file.getOriginalFilename().endsWith(".jar")){
+            if(Objects.requireNonNull(file.getOriginalFilename()).endsWith(".jar")){
                 fileName=FileUtil.createBat(file.getOriginalFilename(),path);
             }else{
                 fileName=file.getOriginalFilename();
@@ -67,11 +69,11 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
             //将增加的任务计划插入数据库
             Task task=new Task();
             task.setName(taskName);
+            task.setType(type);
             task.setState("全部准备就绪");
             task.setLastTime(startTime);
             task.setNextTime(startTime);
             task.setPlanFre("每隔"+repeatInterval+dateType+"执行一次");
-            task.setDataTime(startTime);
             task.setBeginTime(startTime);
             task.setStopTime(stopTime);
             task.setExec(fileName);
@@ -112,7 +114,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                     fileName =taskDao.selectTasksExe(newName);
                 }
                 if("".equals(stopTime)){
-                    JSONArray taskJSON=taskDao.selectTasks(taskName);
+                    JSONArray taskJSON=taskDao.selectTasks(taskName,"");
                     stopTime=taskJSON.getJSONObject(0).getString("stopTime");
                 }
                 result=WinTaskUtil.addWinTask(newName,path,fileName,startTime,stopTime,repeatInterval,dateType);
@@ -151,11 +153,11 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                     fileName =taskDao.selectTasksExe(taskName);
                 }
                 if("".equals(repeatInterval)||"".equals(dateType)){
-                    JSONArray taskJSON=taskDao.selectTasks(taskName);
+                    JSONArray taskJSON=taskDao.selectTasks(taskName,"");
                     String repeat=taskJSON.getJSONObject(0).getString("planFre");
                     repeat=repeat.substring(2);
                     repeat=repeat.substring(0,repeat.length()-4);
-                    if(repeat.indexOf("小时")!=-1){
+                    if(repeat.contains("小时")){
                         repeatInterval=repeat.substring(0,repeat.length()-2);
                         dateType="小时";
                     }else{
@@ -174,9 +176,93 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
     }
 
     @Override
-    public JSONArray selectTasks() {
+    public JSONObject selectTasks() {
+        JSONObject jsonObject=new JSONObject();
+        //获取任务类型数量
+        List<Map<String,Object>> mapList=taskDao.selectType();
+        if(mapList!=null&&mapList.size()>0){
+            for(int i=0;i<mapList.size();i++){
+                JSONArray array=taskDao.selectTasks("",(String)mapList.get(i).get("type"));
+                //计算上次执行时间，下次执行时间
+                array=calDate(array);
+                jsonObject.put("list"+i,array);
+            }
+        }
+        return jsonObject;
+    }
 
-        return taskDao.selectTasks("");
+    public JSONArray calDate(JSONArray array){
+        if(array!=null &&array.size()>0){
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            long now=new Date().getTime();
+            String repeat;
+            String dateType;
+            for (Object o : array) {
+                JSONObject jsonObject = (JSONObject) o;
+                //利用现在时间与开始时间差对重复间隔取商，比较大小计算
+                //获取重复间隔
+                String repeatNew = jsonObject.getString("planFre");
+                repeatNew = repeatNew.substring(2);
+                repeatNew = repeatNew.substring(0, repeatNew.length() - 4);
+                if (repeatNew.contains("小时") ) {
+                    repeat = repeatNew.substring(0, repeatNew.length() - 2);
+                    dateType = "小时";
+                } else {
+                    repeat = repeatNew.substring(0, repeatNew.length() - 1);
+                    dateType = repeatNew.substring(repeatNew.length() - 1);
+                }
+                try {
+                    if ("分，小时，天".contains(dateType)) {
+                        long repeatNum = 0;//重复间隔毫秒数
+                        if ("分".equals(dateType)) {
+                            repeatNum = (Integer.parseInt(repeat)) * 1000 * 60;
+                        } else if ("小时".equals(dateType)) {
+                            repeatNum = (Integer.parseInt(repeat)) * 1000 * 60 * 60;
+                        } else if ("天".equals(dateType)) {
+                            repeatNum = (Integer.parseInt(repeat)) * 1000 * 60 * 60 * 24;
+                        }
+                        //计算取商
+                        long startDate = sdf.parse(jsonObject.getString("beginTime")).getTime();
+                        long difference = (now - startDate) / repeatNum;
+
+                        calendar.setTimeInMillis(startDate + difference * repeatNum);
+                        jsonObject.put("lastTime", sdf.format(calendar.getTime()));
+                        calendar.setTimeInMillis(startDate + (difference + 1) * repeatNum);
+                        jsonObject.put("nextTime", sdf.format(calendar.getTime()));
+                    } else {
+                        if ("月".equals(dateType)) {
+                            calendar.setTimeInMillis(now);
+                            Calendar calStart = Calendar.getInstance();
+                            calStart.setTime(sdf.parse((String) jsonObject.get("beginTime")));
+                            int difference = ((calendar.get(Calendar.MONTH) - calStart.get(Calendar.MONTH)) +
+                                    (calendar.get(Calendar.YEAR) - calStart.get(Calendar.YEAR)) * 12) /
+                                    Integer.parseInt(repeat);
+                            int year = difference / 12;
+                            int month = difference % 12;
+                            calStart.add(Calendar.YEAR, year);
+                            calStart.add(Calendar.MONTH, month);
+                            jsonObject.put("lastTime", sdf.format(calStart.getTime()));
+                            calStart.add(Calendar.MONTH, Integer.parseInt(repeat));
+                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));
+                        } else if ("年".equals(dateType)) {
+                            Calendar calStart = Calendar.getInstance();
+                            calStart.setTime(sdf.parse((String) jsonObject.get("beginTime")));
+                            int difference = (calendar.get(Calendar.YEAR) - calStart.get(Calendar.YEAR)) /
+                                    Integer.parseInt(repeat);
+                            calStart.add(Calendar.YEAR, difference * (Integer.parseInt(repeat)));
+                            jsonObject.put("lastTime", sdf.format(calStart.getTime()));
+                            calStart.add(Calendar.YEAR, Integer.parseInt(repeat));
+                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+        return array;
     }
 
 }
