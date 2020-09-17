@@ -23,10 +23,7 @@ import zhwy.util.Common;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(position = 9,tags = "辽宁气候评估----数据原始值、平均值和极值")
 @RestController
@@ -300,13 +297,24 @@ public class DataAvgAndMController {
         common.getCrossOrigin();
         JSONObject jsObject=new JSONObject();
         List<Map<String,Object>> sequenceLlist;
+        List<Map<String,String>> sequence = new ArrayList<>();
+        Map<String,String>map;
         try {
             String tiaojian=", '"+stationNum+"' as 站号, '"+obsvName+"' as 要素 ";
             sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvval,"短序列",tiaojian);
             if(sequenceLlist.size()==0){
                 jsObject.put("查询失败","请重新选择需要查询的一段时间的短序列，原查询结果为空");
             }else{
-                String ChangXulie=JSONArray.parseArray(JSON.toJSONString(sequenceLlist)).toJSONString();
+                for(int i=0;i<sequenceLlist.size();i++){
+                    map=new HashMap<>();
+                    map.put("站号",String.valueOf(sequenceLlist.get(i).get("站号")));
+                    map.put("时间",String.valueOf(sequenceLlist.get(i).get("时间")));
+                    map.put("要素",String.valueOf(sequenceLlist.get(i).get("要素")));
+                    map.put("短序列",String.valueOf(sequenceLlist.get(i).get("短序列")));
+                    sequence.add(i,map);
+                }
+                String ChangXulie=JSONArray.parseArray(JSON.toJSONString(sequence)).toJSONString();
+
                 jsObject.put("查询成功",ChangXulie);
             }
         }catch (Exception e){
@@ -406,7 +414,16 @@ public class DataAvgAndMController {
                if(listResult.get(0).get("error")!=null){
                    jsObject.put("上传失败",listResult.get(0).get("error"));
                }else{
-                   jsObject.put("上传成功",JSON.toJSONString(listResult));
+                   JSONObject hebingObject;
+                   JSONArray jsonArray=new JSONArray();
+                   for(int i=0;i<listResult.size();i++){
+                       hebingObject=new JSONObject();
+                       for (Map.Entry<String,Object> map:listResult.get(i).entrySet()) {
+                           hebingObject.put(map.getKey(),String.valueOf(map.getValue()));
+                       }
+                       jsonArray.add(i,hebingObject);
+                   }
+                   jsObject.put("上传成功",jsonArray.toJSONString());
                }
            }
        }catch (Exception e){
