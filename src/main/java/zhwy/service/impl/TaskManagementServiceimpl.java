@@ -52,7 +52,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
             }
         }
         if("".equals(type)){
-            type="0";
+            type="观测资料";
         }
         //保存文件
         if(!"".equals(file.getOriginalFilename())){
@@ -185,7 +185,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                 JSONArray array=taskDao.selectTasks("",(String)mapList.get(i).get("type"));
                 //计算上次执行时间，下次执行时间
                 array=calDate(array);
-                jsonObject.put("list"+i,array);
+                jsonObject.put((String)mapList.get(i).get("type"),array);
             }
         }
         return jsonObject;

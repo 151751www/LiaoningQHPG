@@ -24,7 +24,7 @@ public class TaskManagementController {
     @ApiOperation(value = "taskManagement",notes = "任务计划管理")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "name", value = "任务计划名称",required=true,paramType="query",dataType="String"),
-            @ApiImplicitParam(name = "type", value = "任务计划类型：气象站观测数据传0，其他资料传1",required=false,paramType="query",dataType="String"),
+            @ApiImplicitParam(name = "type", value = "任务计划类型：观测资料或其他资料",required=false,paramType="query",dataType="String"),
             @ApiImplicitParam(name = "newName", value = "新任务计划名称",required=false,paramType="query",dataType="String"),
             @ApiImplicitParam(name = "startTime", value = "开始时间,格式:yyyy-mm-dd hh:mm:ss",required=false,paramType="query",dataType="String"),
             @ApiImplicitParam(name = "stopTime", value = "终止时间,格式:yyyy-mm-dd hh:mm:ss",required=false,paramType="query",dataType="String"),
