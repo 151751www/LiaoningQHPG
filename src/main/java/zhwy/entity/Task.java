@@ -2,6 +2,7 @@ package zhwy.entity;
 
 public class Task {
     private String name;
+    private String type;
     private String state;
     private String lastTime;
     private String nextTime;
@@ -16,27 +17,20 @@ public class Task {
     public Task() {
     }
 
-    public Task(String name, String state, String lastTime, String nextTime, String planFre, String beginTime,
-                String stopTime, String dataTime, String exec, String isstart, String isdisable) {
-        this.name = name;
-        this.state = state;
-        this.lastTime = lastTime;
-        this.nextTime = nextTime;
-        this.planFre = planFre;
-        this.beginTime = beginTime;
-        this.stopTime = stopTime;
-        this.dataTime = dataTime;
-        this.exec = exec;
-        this.isstart = isstart;
-        this.isdisable = isdisable;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getState() {
