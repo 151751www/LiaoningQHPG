@@ -1,5 +1,6 @@
 package zhwy.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +22,16 @@ public class DataMethodServiceImpl implements DataMethodService {
     private static Logger logger = LoggerFactory.getLogger(StationServiceImpl.class);
     @Autowired
     public DataMethodDao dataMethodDao;
-    public List<Map<String,Object>> getXulieYanchangData(String stationType,String timeType, String beginTime, String endTime, String stationNum, String obsvName,String name,String tiaojian) throws Exception {
-        return dataMethodDao.getXulieYanchangData(stationType,timeType,beginTime,endTime,stationNum,obsvName,name,tiaojian);
+    public JSONArray getXulieYanchangData(String stationType, String timeType, String beginTime, String endTime, String stationNum, String obsvName, String name, String tiaojian, String[] prarm) throws Exception {
+        return dataMethodDao.getXulieYanchangData(stationType,timeType,beginTime,endTime,stationNum,obsvName,name,tiaojian,prarm);
     }
 
-    public  List<Map<String,Object>> getYanchangDataResult(List<Map<String,Object>> dtData)throws Exception
+    public  List<Map<String,Object>> getYanchangDataResult(List<Map<String,Object>> dtData)
     {
-        List<Map<String,Object>> dtResult = null;
+        List<Map<String,Object>> dtResult;
         /*try {*/
             double[] arrLongValue = new double[dtData.size()];
-            ArrayList<Double> listValue = new ArrayList<Double>();
+            ArrayList<Double> listValue = new ArrayList<>();
             for (int i = 0; i < dtData.size(); i++)
             {
                 double longxulie= Double.parseDouble(String.valueOf(dtData.get(i).get("长序列"))) ;
@@ -123,8 +124,6 @@ public class DataMethodServiceImpl implements DataMethodService {
             for (int i=0;i<LData.size();i++){
                 Object duanxulie=null;
                 for (int s=0;s<SData.size();s++){
-                    String ld= (String) LData.get(i).get("时间");
-                    String sd= (String) SData.get(s).get("时间");
                     if(LData.get(i).get("时间").equals(SData.get(s).get("时间"))){
                         duanxulie=SData.get(s).get("短序列");
                         break;
