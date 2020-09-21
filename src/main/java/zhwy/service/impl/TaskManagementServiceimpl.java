@@ -55,7 +55,7 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
             type="观测资料";
         }
         //保存文件
-        if(!"".equals(file.getOriginalFilename())){
+        if(file!=null&&!"".equals(file.getOriginalFilename())){
             FileUtil.saveFile(file,path);
             //做runTask.bat执行用户上传的jar,py
             if(Objects.requireNonNull(file.getOriginalFilename()).endsWith(".jar")){
