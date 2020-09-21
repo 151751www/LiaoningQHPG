@@ -2,8 +2,13 @@ package zhwy.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jacob.activeX.ActiveXComponent;
+import com.jacob.com.ComThread;
+import com.jacob.com.Dispatch;
+import com.jacob.com.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -14,6 +19,7 @@ import java.util.Map;
 @Service
 @Resource
 public class ChongXianQIService {
+    private static Logger logger = LoggerFactory.getLogger(ChongXianQIService.class);
 
 
     String [] obsv={"气温","气压","水汽压","相对湿度","能见度","降水量","蒸发","积雪深度","风速","温度","地温","地面温度","界值","雪压"};
@@ -22,15 +28,15 @@ public class ChongXianQIService {
     public String   getChongXianQiForgumbel(List<Map<String,Object>> listmap,String obsvName) throws  Exception{
         JSONObject jsonObjectxp;
         JSONObject jsonObjectTemp;
+        JSONObject jsonTable;
         JSONArray arrayxp=new JSONArray();
         JSONArray arraytemp=new JSONArray();
+        JSONArray arrayTable=new JSONArray();
         double[] li =new double[listmap.size()];
         double[] M=new double[listmap.size()];
-        double sumLi=0.00;
         for (int i=0;i<listmap.size();i++){
             li[i]=Double.parseDouble(listmap.get(i).get("年值").toString());
             M[i]=i+1;
-            sumLi+=Double.parseDouble(listmap.get(i).get("年值").toString());
         }
         double[] pm = new double[99];
         double pmx=0.00;
@@ -44,7 +50,7 @@ public class ChongXianQIService {
             bg= new BigDecimal(pmx);
             x_xp[i]=-Math.log(-Math.log(pmx));
             y_xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            x_year[i]= (int) (1/pmx);
+            x_year[i]= (int) (1/y_xp[i]);
         }
         double[] x=li;
         double[]temp=BubbleSort(x,"asc");
@@ -56,10 +62,10 @@ public class ChongXianQIService {
         for (int i=0;i<M.length;i++){
             x_temp[i]=-Math.log(-Math.log((M[i]/(N+1))));
             y[i]=-Math.log(-Math.log(1-M[i]/(N+1)));
-            y_temp[i]=M[i]/(N+1);
+            y_temp[i]=1-M[i]/(N+1);
         }
 
-        double ave_x=sumLi/x.length;
+        double ave_x=GetAvgValue(M);
         double dVar=0;
         for(int i=0;i<x.length;i++){//求方差
                 dVar+=(x[i]-ave_x)*(x[i]-ave_x);
@@ -79,8 +85,8 @@ public class ChongXianQIService {
         double u=ave_x-s_x/s_y*ave_y;
         double[] xp=new double[pm.length];
         for (int i=0; i<pm.length;i++){
-            xp[i]=u-a*Math.log(-Math.log(pm[i]));
-            //xp[i]=u-a*Math.log(-Math.log(1-pm[i]));
+            //xp[i]=u-a*Math.log(-Math.log(pm[i]));
+            xp[i]=u-a*Math.log(-Math.log(1-pm[i]));
             bg= new BigDecimal(xp[i]);
             xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
@@ -89,12 +95,24 @@ public class ChongXianQIService {
            // jsonObjectxp.put("x_xp",x_xp[i]);
             jsonObjectxp.put("y_xp",y_xp[i]);
             jsonObjectxp.put("xp",xp[i]);
-            jsonObjectxp.put("year",x_year[i]);
             arrayxp.add(i,jsonObjectxp);
+            if(i==0||i==1||i==2||i==4||i==9||i==19||i==32||i==49||i==98){
+                jsonTable=new JSONObject();
+                if(i==2){
+                    jsonTable.put("year","30");
+                }else if(i==32){
+                    jsonTable.put("year","3");
+                }else {
+                    jsonTable.put("year",x_year[i]);
+                }
+                bg= new BigDecimal(xp[i]);
+                xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
+                jsonTable.put("xp",xp[i]);
+                arrayTable.add(jsonTable);
+            }
         }
         for (int i=0;i<temp.length;i++){
             jsonObjectTemp=new JSONObject(true);
-            //jsonObjectTemp.put("x_temp",x_temp[i]);
             jsonObjectTemp.put("y_temp",y_temp[i]);
             jsonObjectTemp.put("temp",temp[i]);
             arraytemp.add(i,jsonObjectTemp);
@@ -110,6 +128,7 @@ public class ChongXianQIService {
         jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
+        jsonObject.put("表格数据",arrayTable);
      return  jsonObject.toJSONString();
 
     }
@@ -299,5 +318,108 @@ public class ChongXianQIService {
         return a0;
     }
 
+    public String getXpForP3(List<Map<String,Object>> listmap,String obsvName){
+        JSONObject jsonObjectxp;
+        JSONObject jsonTable;
+        JSONObject jsonObjectTemp;
+        JSONArray arrayxp=new JSONArray();
+        JSONArray arraytemp=new JSONArray();
+        JSONArray arraytable=new JSONArray();
+        double[] li =new double[listmap.size()];
+        for (int i=0;i<listmap.size();i++){
+            li[i]=Double.parseDouble(listmap.get(i).get("年值").toString());
+        }
+        Map<String,Double> map=GetCanShuPNew(li);
+        double a=GetValue_a(map.get("Cs"));
+        double b=GetValue_b(map.get("avgx"),map.get("Cs"),map.get("Cv"));
+        double a0=GetValue_a0(map.get("avgx"),map.get("Cs"),map.get("Cv"));
+        double[] pm = new double[99];
+        double pmx=0.00;
+        double[] y_xp=new double[99];
+        int []x_year=new int[99];
+        BigDecimal bg;
+        for (int i=0;i<99;i++){
+            pmx=pmx+0.01;
+            pm[i]=pmx;
+            bg= new BigDecimal(pmx);
+            y_xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            x_year[i]= (int) (1/y_xp[i]);
+        }
+        double[] x=li;
+        double[]temp=BubbleSort(x,"asc");
+        double[] y_temp=new double[temp.length];
+        for (int i=0;i<temp.length;i++){
+            y_temp[i]=i/(temp.length+1);
+        }
+        double[] xp=getGammainv(pm,a,b,a0);
+        for (int i=0;i<xp.length;i++){
+            jsonObjectxp=new JSONObject(true);
+            jsonObjectxp.put("y_xp",y_xp[i]);
+            jsonObjectxp.put("xp",xp[i]);
+            arrayxp.add(i,jsonObjectxp);
+            //0  1 2  4 9  19  32  49  98
+            if(i==0||i==1||i==2||i==4||i==9||i==19||i==32||i==49||i==98){
+                jsonTable=new JSONObject();
+                if(i==2){
+                    jsonTable.put("year","30");
+                }else if(i==32){
+                    jsonTable.put("year","3");
+                }else {
+                    jsonTable.put("year",x_year[i]);
+                }
+                bg= new BigDecimal(xp[i]);
+                xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
+                jsonTable.put("xp",xp[i]);
+                arraytable.add(jsonTable);
+            }
+        }
+        for (int i=0;i<temp.length;i++){
+            jsonObjectTemp=new JSONObject(true);
+            jsonObjectTemp.put("y_temp",y_temp[i]);
+            jsonObjectTemp.put("temp",temp[i]);
+            arraytemp.add(i,jsonObjectTemp);
+        }
+        String odanwei="";
+        for ( int i=0;i<obsv.length;i++){
+            if(obsvName.indexOf(obsv[i])!=-1){
+                odanwei=danwei[i];
+                continue;
+            }
+        }
+        JSONObject  jsonObject=new JSONObject(true);
+        jsonObject.put("单位",odanwei);
+        jsonObject.put("直线图",arrayxp);
+        jsonObject.put("散点图",arraytemp);
+        jsonObject.put("表格数据",arraytable);
+        return  jsonObject.toJSONString();
+    }
+
+    public double [] getGammainv(double[] X,double a,double b,double a0){
+        ComThread.InitSTA();
+        ActiveXComponent xl = new ActiveXComponent("Excel.Application");
+        double [] array=new double[X.length];
+        try {
+            xl.setProperty("Visible", new Variant(true));//设置程序可见
+            Object workbooks = xl.getProperty("Workbooks").toDispatch();
+            Object workbook = Dispatch.get((Dispatch) workbooks,"Add").toDispatch();
+            Object sheet = Dispatch.get((Dispatch) workbook,"ActiveSheet").toDispatch();
+            for(int i=0;i<X.length;i++){
+                Object a2 = Dispatch.invoke((Dispatch) sheet, "Range", Dispatch.Get,
+                        new Object[] {"A2"},
+                        new int[1]).toDispatch();
+                Dispatch.put((Dispatch) a2, "Formula", "=GAMMAINV(1-"+X[i]+","+a+",1/"+b+")+"+a0);
+                array[i]=Double.parseDouble(String.valueOf(Dispatch.get((Dispatch) a2, "Value")));
+            }
+            Variant f = new Variant(false);
+            Dispatch.call((Dispatch) workbook, "Close", f);
+        } catch (Exception e) {
+            logger.error("gammainv函数获取xp出错  getGammainv"+e.getMessage());
+            e.printStackTrace();
+        } finally {
+            xl.invoke("Quit", new Variant[] {});
+            ComThread.Release();
+        }
+        return array;
+    }
 
 }

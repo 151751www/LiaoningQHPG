@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,10 @@ import zhwy.util.Common;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Api(position = 9,tags = "辽宁气候评估----数据原始值、平均值和极值")
 @RestController
@@ -296,32 +298,21 @@ public class DataAvgAndMController {
         //跨域
         common.getCrossOrigin();
         JSONObject jsObject=new JSONObject();
-        List<Map<String,Object>> sequenceLlist;
-        List<Map<String,String>> sequence = new ArrayList<>();
-        Map<String,String>map;
+        JSONArray sequenceLlist;
         try {
+            String[] prarm={"站号","时间","要素","短序列"};
             String tiaojian=", '"+stationNum+"' as 站号, '"+obsvName+"' as 要素 ";
-            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvval,"短序列",tiaojian);
+            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvval,"短序列",tiaojian,prarm);
             if(sequenceLlist.size()==0){
                 jsObject.put("查询失败","请重新选择需要查询的一段时间的短序列，原查询结果为空");
             }else{
-                for(int i=0;i<sequenceLlist.size();i++){
-                    map=new HashMap<>();
-                    map.put("站号",String.valueOf(sequenceLlist.get(i).get("站号")));
-                    map.put("时间",String.valueOf(sequenceLlist.get(i).get("时间")));
-                    map.put("要素",String.valueOf(sequenceLlist.get(i).get("要素")));
-                    map.put("短序列",String.valueOf(sequenceLlist.get(i).get("短序列")));
-                    sequence.add(i,map);
-                }
-                String ChangXulie=JSONArray.parseArray(JSON.toJSONString(sequence)).toJSONString();
-
-                jsObject.put("查询成功",ChangXulie);
+                jsObject.put("查询成功",sequenceLlist);
             }
         }catch (Exception e){
             logger.error("短序列查询失败"+e.getMessage());
             jsObject.put("查询失败","短序列查询失败"+e.getMessage());
         }
-        return  StringEscapeUtils.unescapeJava(jsObject.toJSONString());
+        return jsObject.toJSONString();
     }
 
     @ApiOperation(value = "长序列数据库查询")
@@ -340,28 +331,30 @@ public class DataAvgAndMController {
         common.getCrossOrigin();
        String result="";
         JSONObject jsObject=new JSONObject();
-        List<Map<String,Object>> sequenceLlist;
+        JSONArray sequenceLlist;
         try {
             sequenceS=URLDecoder.decode(sequenceS,"utf-8");
             List<Map<String,Object>> sequenceSlist=common.getList(sequenceS,new String[]{"时间","站号","要素","短序列"});
-            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvName,"长序列","");
+            String [] prarm={"时间","长序列"};
+            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvName,"长序列","",prarm);
             if(("时，日，年").indexOf(timeType)<0){
                 jsObject.put("查询失败","序列订正延长只支持小时数据，日数据，年数据");
                 return jsObject.toJSONString();
             }
             if(sequenceLlist.size()>0){
-                result=getHebingXulieDate(sequenceLlist,sequenceSlist,timeType);
+                List<Map<String,Object>> list =common.getList(sequenceLlist.toJSONString(),prarm);
+                result=getHebingXulieDate(list,sequenceSlist,timeType).replace("/","");
             }else{
                 jsObject.put("查询失败","长序列查询结果为null");
                 result=jsObject.toJSONString();
             }
         }catch (Exception e){
-            logger.error("查询短序列失败"+e.getMessage());
+            logger.error("查询长序列失败"+e.getMessage());
             e.printStackTrace();
-            jsObject.put("查询失败","上传短序列失败"+e.getMessage());
+            jsObject.put("查询失败","上传长序列失败"+e.getMessage());
             return  jsObject.toJSONString();
         }
-        return  StringEscapeUtils.unescapeJava(result);
+        return  result;
     }
 
     @ApiOperation(value = "上传长序列文件", notes = "上传文件", httpMethod="POST" ,consumes="multipart/form-data")
@@ -379,7 +372,7 @@ public class DataAvgAndMController {
         List<Map<String,Object>> sequenceSlist;
         try {
             sequenceS=URLDecoder.decode(sequenceS,"utf-8");
-            sequenceSlist=common.getList(sequenceS,new String[]{"时间","短序列"});
+            sequenceSlist=common.getList(sequenceS,new String[]{"站号","时间","要素","短序列"});
             if(("时，日，年").indexOf(timeType)<0){
                 jsObject.put("上传失败","序列订正延长只支持小时数据，日数据，年数据");
                 result= jsObject.toJSONString();
@@ -397,8 +390,8 @@ public class DataAvgAndMController {
                 }
             }
         }catch (Exception e){
-            logger.error("上传短序列失败"+e.getMessage());
-            jsObject.put("上传失败","上传短序列失败"+e.getMessage());
+            logger.error("上传长序列失败"+e.getMessage());
+            jsObject.put("上传失败","上传长序列失败"+e.getMessage());
             result= jsObject.toJSONString();
         }
         return  result;
@@ -423,7 +416,7 @@ public class DataAvgAndMController {
                        }
                        jsonArray.add(i,hebingObject);
                    }
-                   jsObject.put("上传成功",jsonArray.toJSONString());
+                   jsObject.put("上传成功",jsonArray.toString());
                }
            }
        }catch (Exception e){

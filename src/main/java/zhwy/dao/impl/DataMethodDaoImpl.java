@@ -1,5 +1,6 @@
 package zhwy.dao.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,9 @@ public class DataMethodDaoImpl implements DataMethodDao {
     @Autowired
     private GeneralDaoImpl generalDao;
 
-    public List<Map<String,Object>> getXulieYanchangData(String stationType,String timeType, String beginTime, String endTime, String stationNum, String obsvName,String name,String tiaojian){
+    public JSONArray  getXulieYanchangData(String stationType, String timeType, String beginTime, String endTime, String stationNum, String obsvName, String name, String tiaojian,String []prarm){
         String SQLTableName="";
-        List<Map<String,Object>> list=null;
+        JSONArray rearr = null;       
         int dnum=0;
         if (timeType.equals("时"))
         {
@@ -66,12 +67,12 @@ public class DataMethodDaoImpl implements DataMethodDao {
         sql.append(" and "+obsvName+" is not null ");
         sql.append(" order by observe_date asc");
         try {
-            list= generalDao.getDataList(sql.toString());
+             rearr= generalDao.getDataBySql(sql.toString(),prarm);
         }catch (Exception e){
             logger.error("查询长历史数据出错 DataMethodDaoImpl----getXulieYanchangData  "+e.getMessage());
         }
 
-        return list;
+        return rearr;
     }
 
     public String saveDuanxulie(List<Map<String,Object>> list,String dateType){
