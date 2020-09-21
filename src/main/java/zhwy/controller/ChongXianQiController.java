@@ -39,9 +39,12 @@ public class ChongXianQiController {
     @ApiOperation(value = "上传年极值文件", notes = "上传文件", httpMethod="POST" ,consumes="multipart/form-data")
     @PostMapping(value = "/uploadFileForChongxianqi")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file",value = "年极值文件，",paramType = "formData",required = true,dataType = "file")
+            @ApiImplicitParam(name = "file",value = "年极值文件，",paramType = "formData",required = true,dataType = "file"),
+            @ApiImplicitParam(name = "stationNum", value = "台站号(54236,54668)", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "obsvName", value = "要素名称(平均气温，最高气温，...)", required = true, paramType = "query", dataType = "String")
+
     })
-    public String uploadFileForChongxianqi( MultipartFile file)  {
+    public String uploadFileForChongxianqi( MultipartFile file,String stationNum,String obsvName)  {
         //跨域
         common.getCrossOrigin();
         JSONObject jsObject=new JSONObject();
@@ -49,7 +52,22 @@ public class ChongXianQiController {
         if(result.indexOf("上传文件格式不正确")!=-1){
             jsObject.put("上传失败",result);
         }else{
-            jsObject.put("上传成功",result);
+            JSONArray array=JSONArray.parseArray(result);
+            JSONObject jsonObject;
+            for (int i=0;i<array.size();i++){
+                jsonObject=new JSONObject(true);
+                jsonObject.put("站号",stationNum);
+                jsonObject.put("时间",array.getJSONObject(i).get("时间"));
+                jsonObject.put("要素",obsvName);
+                jsonObject.put("年值",array.getJSONObject(i).get("年值"));
+                if(i==0){
+                    array=new JSONArray();
+                    array.add(i,jsonObject);
+                }else{
+                    array.add(i,jsonObject);
+                }
+            }
+            jsObject.put("上传成功",array.toJSONString());
         }
         return jsObject.toJSONString() ;
     }
@@ -70,7 +88,7 @@ public class ChongXianQiController {
         JSONArray sequenceLlist;
         try {
             String tiaojian=", '"+stationNum+"' as 站号, '"+obsvName+"' as 要素 ";
-            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,"年", beginTime, endTime, stationNum, obsvval,"年极值",tiaojian,new String[]{"站号","时间","要素","年极值"});
+            sequenceLlist = dataMethodService.getXulieYanchangData(stationType,"年", beginTime, endTime, stationNum, obsvval,"年值",tiaojian,new String[]{"站号","时间","要素","年值"});
             if(sequenceLlist.size()==0){
                 jsObject.put("查询失败","请重新选择需要查询的一段时间的年极值，原查询结果为空");
             }else{

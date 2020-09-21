@@ -437,6 +437,7 @@ public class DataAvgAndMController {
         common.getCrossOrigin();
         String  result="";
         try {
+            sequence=URLDecoder.decode(sequence,"utf-8");
             List<Map<String,Object>> dt=common.getList(sequence,new String []{"时间","长序列","短序列","站号","要素","短序列订正值"});
            result=dataMethodService.saveDuanxulie(dt,timeType);
 
