@@ -31,7 +31,6 @@ public class ChongXianQIService {
         JSONObject jsonTable;
         JSONArray arrayxp=new JSONArray();
         JSONArray arraytemp=new JSONArray();
-        JSONArray arrayTable=new JSONArray();
         double[] li =new double[listmap.size()];
         double[] M=new double[listmap.size()];
         for (int i=0;i<listmap.size();i++){
@@ -42,7 +41,7 @@ public class ChongXianQIService {
         double pmx=0.00;
         double[] x_xp=new double[99];
         double[] y_xp=new double[99];
-        int []x_year=new int[99];
+        double []x_year=new double[99];
         BigDecimal bg;
         for (int i=0;i<99;i++){
             pmx=pmx+0.01;
@@ -50,7 +49,10 @@ public class ChongXianQIService {
             bg= new BigDecimal(pmx);
             x_xp[i]=-Math.log(-Math.log(pmx));
             y_xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            x_year[i]= (int) (1/y_xp[i]);
+            //x_year[i]= (int) (1/y_xp[i]);
+            x_year[i]= (1/(1-y_xp[i]));
+            bg=new BigDecimal(x_year[i]);
+            x_year[i]=bg.setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
         double[] x=li;
         double[]temp=BubbleSort(x,"asc");
@@ -62,10 +64,10 @@ public class ChongXianQIService {
         for (int i=0;i<M.length;i++){
             x_temp[i]=-Math.log(-Math.log((M[i]/(N+1))));
             y[i]=-Math.log(-Math.log(1-M[i]/(N+1)));
-            y_temp[i]=1-M[i]/(N+1);
+            y_temp[i]=M[i]/(N+1);
         }
 
-        double ave_x=GetAvgValue(M);
+        double ave_x=GetAvgValue(temp);
         double dVar=0;
         for(int i=0;i<x.length;i++){//求方差
                 dVar+=(x[i]-ave_x)*(x[i]-ave_x);
@@ -85,30 +87,28 @@ public class ChongXianQIService {
         double u=ave_x-s_x/s_y*ave_y;
         double[] xp=new double[pm.length];
         for (int i=0; i<pm.length;i++){
-            //xp[i]=u-a*Math.log(-Math.log(pm[i]));
-            xp[i]=u-a*Math.log(-Math.log(1-pm[i]));
+            xp[i]=u-a*Math.log(-Math.log(pm[i]));
             bg= new BigDecimal(xp[i]);
             xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
+        jsonTable=new JSONObject(true);
         for (int i=0;i<xp.length;i++){
             jsonObjectxp=new JSONObject(true);
            // jsonObjectxp.put("x_xp",x_xp[i]);
             jsonObjectxp.put("y_xp",y_xp[i]);
             jsonObjectxp.put("xp",xp[i]);
             arrayxp.add(i,jsonObjectxp);
-            if(i==0||i==1||i==2||i==4||i==9||i==19||i==32||i==49||i==98){
-                jsonTable=new JSONObject();
-                if(i==2){
-                    jsonTable.put("year","30");
-                }else if(i==32){
-                    jsonTable.put("year","3");
+            bg= new BigDecimal(xp[i]);
+            xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
+            if(y_xp[i]==0.01||y_xp[i]==0.5||y_xp[i]==0.67||y_xp[i]==0.8||y_xp[i]==0.9||y_xp[i]==0.95||y_xp[i]==0.97||y_xp[i]==0.98||y_xp[i]==0.99){
+
+                if(y_xp[i]==0.97){
+                    jsonTable.put("30",xp[i]);
+                }else if(y_xp[i]==0.67){
+                    jsonTable.put("3",xp[i]);
                 }else {
-                    jsonTable.put("year",x_year[i]);
+                    jsonTable.put(String.valueOf((int)x_year[i]),xp[i]);
                 }
-                bg= new BigDecimal(xp[i]);
-                xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
-                jsonTable.put("xp",xp[i]);
-                arrayTable.add(jsonTable);
             }
         }
         for (int i=0;i<temp.length;i++){
@@ -128,7 +128,7 @@ public class ChongXianQIService {
         jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
-        jsonObject.put("表格数据",arrayTable);
+        jsonObject.put("表格数据",jsonTable);
      return  jsonObject.toJSONString();
 
     }
@@ -320,11 +320,10 @@ public class ChongXianQIService {
 
     public String getXpForP3(List<Map<String,Object>> listmap,String obsvName){
         JSONObject jsonObjectxp;
-        JSONObject jsonTable;
+        JSONObject jsonXpTable;
         JSONObject jsonObjectTemp;
         JSONArray arrayxp=new JSONArray();
         JSONArray arraytemp=new JSONArray();
-        JSONArray arraytable=new JSONArray();
         double[] li =new double[listmap.size()];
         for (int i=0;i<listmap.size();i++){
             li[i]=Double.parseDouble(listmap.get(i).get("年值").toString());
@@ -352,25 +351,23 @@ public class ChongXianQIService {
             y_temp[i]=i/(temp.length+1);
         }
         double[] xp=getGammainv(pm,a,b,a0);
+        jsonXpTable=new JSONObject(true);
         for (int i=0;i<xp.length;i++){
             jsonObjectxp=new JSONObject(true);
             jsonObjectxp.put("y_xp",y_xp[i]);
             jsonObjectxp.put("xp",xp[i]);
             arrayxp.add(i,jsonObjectxp);
+            bg= new BigDecimal(xp[i]);
+            xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
             //0  1 2  4 9  19  32  49  98
             if(i==0||i==1||i==2||i==4||i==9||i==19||i==32||i==49||i==98){
-                jsonTable=new JSONObject();
                 if(i==2){
-                    jsonTable.put("year","30");
+                    jsonXpTable.put(""+30,xp[i]);
                 }else if(i==32){
-                    jsonTable.put("year","3");
+                    jsonXpTable.put(""+3,xp[i]);
                 }else {
-                    jsonTable.put("year",x_year[i]);
+                    jsonXpTable.put(""+x_year[i],xp[i]);
                 }
-                bg= new BigDecimal(xp[i]);
-                xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
-                jsonTable.put("xp",xp[i]);
-                arraytable.add(jsonTable);
             }
         }
         for (int i=0;i<temp.length;i++){
@@ -390,7 +387,7 @@ public class ChongXianQIService {
         jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
-        jsonObject.put("表格数据",arraytable);
+        jsonObject.put("表格数据",jsonXpTable);
         return  jsonObject.toJSONString();
     }
 

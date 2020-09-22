@@ -1,26 +1,21 @@
 package zhwy.service;
 
+import com.alibaba.fastjson.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import zhwy.gis.GisPoint;
+import zhwy.gis.InterpolationManager;
+import zhwy.util.MakeGradsFile;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-
-import zhwy.gis.GisPoint;
-import zhwy.gis.InterpolationManager;
-import zhwy.util.MakeGradsFile;
-
 @Service
-@PropertySource("classpath:address.properties")
 public class HuiTuService {
 	private static Logger logger = LoggerFactory.getLogger(HuiTuService.class);
 
