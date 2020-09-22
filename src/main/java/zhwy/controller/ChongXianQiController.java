@@ -18,6 +18,7 @@ import zhwy.service.ChongXianQIService;
 import zhwy.service.DataMethodService;
 import zhwy.util.Common;
 
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,7 @@ public class ChongXianQiController {
             jsObject.put("上传失败",result);
         }else{
             JSONArray array=JSONArray.parseArray(result);
+            JSONArray resultArray=new JSONArray();
             JSONObject jsonObject;
             for (int i=0;i<array.size();i++){
                 jsonObject=new JSONObject(true);
@@ -60,14 +62,9 @@ public class ChongXianQiController {
                 jsonObject.put("时间",array.getJSONObject(i).get("时间"));
                 jsonObject.put("要素",obsvName);
                 jsonObject.put("年值",array.getJSONObject(i).get("年值"));
-                if(i==0){
-                    array=new JSONArray();
-                    array.add(i,jsonObject);
-                }else{
-                    array.add(i,jsonObject);
-                }
+                resultArray.add(i,jsonObject);
             }
-            jsObject.put("上传成功",array.toJSONString());
+            jsObject.put("上传成功",resultArray.toJSONString());
         }
         return jsObject.toJSONString() ;
     }
@@ -104,9 +101,6 @@ public class ChongXianQiController {
     }
 
 
-
-
-
     @ApiOperation(value = "重现期查询")
     @PostMapping(value = "/getDataForChongxianqi")
     @ApiImplicitParams({
@@ -114,13 +108,16 @@ public class ChongXianQiController {
             @ApiImplicitParam(name = "suanfaType", value = "算法类型（耿贝尔分布法，皮尔逊Ⅲ分布法）", required = true, paramType = "query", dataType = "String")
 
     })
-    public String getDataForChongxianqi( String  yearData,String obsvName,String suanfaType)  {
+    public String getDataForChongxianqi( String  yearData,String suanfaType)  {
         String result = null;
         JSONObject jsonObject=new JSONObject();
         //跨域
         common.getCrossOrigin();
-        List<Map<String,Object>> data=common.getList(yearData,new String[]{"时间","年值"});
         try {
+            yearData= URLDecoder.decode(yearData,"utf-8");
+            suanfaType= URLDecoder.decode(suanfaType,"utf-8");
+            List<Map<String,Object>> data=common.getList(yearData,new String[]{"时间","年值","要素"});
+            String obsvName=String.valueOf(data.get(0).get("要素"));
             if(suanfaType.equals("耿贝尔分布法")){
                 result =chongXianQIService.getChongXianQiForgumbel(data,obsvName);
             }else if(suanfaType.equals("皮尔逊Ⅲ分布法")){
