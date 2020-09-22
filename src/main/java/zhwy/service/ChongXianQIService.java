@@ -31,6 +31,7 @@ public class ChongXianQIService {
         JSONObject jsonTable;
         JSONArray arrayxp=new JSONArray();
         JSONArray arraytemp=new JSONArray();
+        JSONArray arrayTable=new JSONArray();
         double[] li =new double[listmap.size()];
         double[] M=new double[listmap.size()];
         for (int i=0;i<listmap.size();i++){
@@ -111,6 +112,7 @@ public class ChongXianQIService {
                 }
             }
         }
+        arrayTable.add(jsonTable);
         for (int i=0;i<temp.length;i++){
             jsonObjectTemp=new JSONObject(true);
             jsonObjectTemp.put("y_temp",y_temp[i]);
@@ -128,7 +130,7 @@ public class ChongXianQIService {
         jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
-        jsonObject.put("表格数据",jsonTable);
+        jsonObject.put("表格数据",arrayTable);
      return  jsonObject.toJSONString();
 
     }
@@ -324,6 +326,7 @@ public class ChongXianQIService {
         JSONObject jsonObjectTemp;
         JSONArray arrayxp=new JSONArray();
         JSONArray arraytemp=new JSONArray();
+        JSONArray arrayTable=new JSONArray();
         double[] li =new double[listmap.size()];
         for (int i=0;i<listmap.size();i++){
             li[i]=Double.parseDouble(listmap.get(i).get("年值").toString());
@@ -370,6 +373,7 @@ public class ChongXianQIService {
                 }
             }
         }
+        arrayTable.add(jsonXpTable);
         for (int i=0;i<temp.length;i++){
             jsonObjectTemp=new JSONObject(true);
             jsonObjectTemp.put("y_temp",y_temp[i]);
@@ -387,7 +391,7 @@ public class ChongXianQIService {
         jsonObject.put("单位",odanwei);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
-        jsonObject.put("表格数据",jsonXpTable);
+        jsonObject.put("表格数据",arrayTable);
         return  jsonObject.toJSONString();
     }
 
