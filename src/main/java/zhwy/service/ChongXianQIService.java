@@ -66,6 +66,8 @@ public class ChongXianQIService {
             x_temp[i]=-Math.log(-Math.log((M[i]/(N+1))));
             y[i]=-Math.log(-Math.log(1-M[i]/(N+1)));
             y_temp[i]=M[i]/(N+1);
+            bg= new BigDecimal(y_temp[i]);
+            y_temp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
 
         double ave_x=GetAvgValue(temp);
@@ -96,8 +98,6 @@ public class ChongXianQIService {
         for (int i=0;i<xp.length;i++){
             jsonObjectxp=new JSONObject(true);
            // jsonObjectxp.put("x_xp",x_xp[i]);
-            jsonObjectxp.put("y_xp",y_xp[i]);
-            jsonObjectxp.put("xp",xp[i]);
             arrayxp.add(i,jsonObjectxp);
             bg= new BigDecimal(xp[i]);
             xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
@@ -111,6 +111,8 @@ public class ChongXianQIService {
                     jsonTable.put(String.valueOf((int)x_year[i]),xp[i]);
                 }
             }
+            jsonObjectxp.put("y_xp",y_xp[i]);
+            jsonObjectxp.put("xp",xp[i]);
         }
         arrayTable.add(jsonTable);
         for (int i=0;i<temp.length;i++){
@@ -351,14 +353,15 @@ public class ChongXianQIService {
         double[]temp=BubbleSort(x,"asc");
         double[] y_temp=new double[temp.length];
         for (int i=0;i<temp.length;i++){
-            y_temp[i]=i/(temp.length+1);
+            double countY=temp.length+1;
+            y_temp[i]=(i+1)/countY;
+            bg= new BigDecimal(y_temp[i]);
+            y_temp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
         }
         double[] xp=getGammainv(pm,a,b,a0);
         jsonXpTable=new JSONObject(true);
         for (int i=0;i<xp.length;i++){
             jsonObjectxp=new JSONObject(true);
-            jsonObjectxp.put("y_xp",y_xp[i]);
-            jsonObjectxp.put("xp",xp[i]);
             arrayxp.add(i,jsonObjectxp);
             bg= new BigDecimal(xp[i]);
             xp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留1位小数
@@ -372,6 +375,8 @@ public class ChongXianQIService {
                     jsonXpTable.put(""+x_year[i],xp[i]);
                 }
             }
+            jsonObjectxp.put("y_xp",y_xp[i]);
+            jsonObjectxp.put("xp",xp[i]);
         }
         arrayTable.add(jsonXpTable);
         for (int i=0;i<temp.length;i++){
