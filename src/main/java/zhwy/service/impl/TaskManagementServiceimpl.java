@@ -200,6 +200,9 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
             String dateType;
             for (Object o : array) {
                 JSONObject jsonObject = (JSONObject) o;
+                //启用和禁用改为布尔类型
+                jsonObject.put("isstart", "true".equals(jsonObject.getString("isstart")));
+                jsonObject.put("isdisable", "true".equals(jsonObject.getString("isdisable")));
                 //利用现在时间与开始时间差对重复间隔取商，比较大小计算
                 //获取重复间隔
                 String repeatNew = jsonObject.getString("planFre");
