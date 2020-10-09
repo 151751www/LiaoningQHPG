@@ -13,18 +13,20 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import zhwy.PoiForFile.BaseSection;
 import zhwy.PoiForFile.PoiUtils;
 import zhwy.service.ChanPinService;
 import zhwy.util.Common;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -321,27 +323,6 @@ public class ChanPinController {
             e.printStackTrace();
         }
         return  "成功";
-    }
-
-    @RequestMapping(value = "/exportWord",method = RequestMethod.GET)
-    @ApiOperation(value = "生成并导出word文档", httpMethod = "GET", notes = "生成并导出word文档", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public void exportFDDBrief(
-            HttpServletResponse response) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-        //获取统计时间段
-        String time = "10.09-10.19";
-        String wordName = "Word版-("+time+")"+sdf.format(new Date());
-        // 告诉浏览器用什么软件可以打开此文件
-        response.reset();// 清空输出流
-        response.setHeader("content-Type", "application/msword");
-        // 下载文件的默认名称
-        response.setHeader("Content-Disposition", "attachment;filename="
-                +new String(wordName.getBytes("GB2312"), "8859_1") + ".docx");
-        OutputStream out = response.getOutputStream();
-        //读取word模板
-        InputStream in = this.getClass().getResourceAsStream("/templates/wordTemplate.docx");
-        //wordService.exportWord(in,out,"全球");
-
     }
 
 }
