@@ -19,31 +19,5 @@ logging:
   file:
     name: logs/error.log
 
-quartz:
-  #相关属性配置
-  properties:
-    org:
-      quartz:
-        scheduler:
-          instanceName: DefaultQuartzScheduler
-        jobStore:
-          class: org.quartz.impl.jdbcjobstore.JobStoreTX
-          driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-          tablePrefix : qrtz_
-
-        threadPool:
-          class: org.quartz.simpl.SimpleThreadPool
-          threadCount: 10
-          threadPriority: 5
-          threadsInheritContextClassLoaderOfInitializingThread: true
-        dataSource:
-          default:
-            URL: jdbc:sqlserver://192.168.0.220\SQL2008R2;DatabaseName=辽宁省生态保护重大工程气候效应评估系统
-            user: sa
-            password: Zhwykj123
-            driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
-
-
-
 
 

@@ -64,5 +64,10 @@ public class GeneralDaoImpl{
 			return ans;
 	}
 
+	public int  excuSql(String sql)throws Exception{
+		int num=nrietjdbcTemplate.update(sql);
+		return num;
+	}
+
 
 }

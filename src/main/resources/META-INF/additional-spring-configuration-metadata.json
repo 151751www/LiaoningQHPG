@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "server.spring.http.multipart.max-file-size",
+      "type": "java.lang.String",
+      "description": "Description for server.spring.http.multipart.max-file-size."
+    },
+    {
+      "name": "server.max-file-size",
+      "type": "java.lang.String",
+      "description": "Description for server.max-file-size."
+    }
+  ] }

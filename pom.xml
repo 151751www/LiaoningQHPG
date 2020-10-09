@@ -126,7 +126,6 @@
             <version>1.0.24</version>
         </dependency>
 
-
         <dependency>
             <groupId>jacob</groupId>
             <artifactId>jacob</artifactId>
@@ -136,17 +135,9 @@
         </dependency>
 
         <dependency>
-            <groupId>aspose</groupId>
-            <artifactId>aspose</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${project.basedir}/lib/aspose.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
+           <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

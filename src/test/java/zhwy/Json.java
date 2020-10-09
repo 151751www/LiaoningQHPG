@@ -1,15 +1,11 @@
 package zhwy;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.special.Gamma;
-import zhwy.util.Common;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -369,42 +365,44 @@ public class Json {
             e.printStackTrace();
         }
     }*/
-    public static void main(String[] args) {
+    public static void main(String[] args)  {
+        try {
+            writeExcelWithFormula("Formulas.xlsx");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-        System.out.println(getGammaInv(161.7));
-        System.out.println(getGammaInv(137.8));
     }
 
+
+
+        public static void writeExcelWithFormula(String fileName) {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Numbers");
+            Row row = sheet.createRow(0);
+            row.createCell(0).setCellValue(10);
+            row.createCell(1).setCellValue(20);
+            row.createCell(2).setCellValue(30);
+            //set formula cell
+            row.createCell(3).setCellFormula("A1*B1*C1");
+            System.out.println(row.getCell(3).getCellFormula());
+            System.out.println(row.getCell(3).getNumericCellValue());
+        }
     public static  double getGammaInv(double x){
         double  a=2.1786195721735817;
         double b=0.053036345708270725;
         double a0=23.047140221402216;
         double ad=Math.pow(b,a);
-        double gamma1=Gamma.gamma(a);
-        System.out.println("gamma1:"+gamma1);
+        double gamma1=Gamma.gamma(2.28065545);
         double d1=Math.pow(b,a)/gamma1;
-        double d2=Math.pow(x-a0,a-1);
-        double d3=(Math.pow(Math.E,1/b*(x-a0)));
-        double y=d1*d2*d3;
+        double xa0=x-a0;
+        double d2=Math.pow(xa0,a-1);
+        double d3=Math.pow(Math.E,-b*(1-a0));
+        double y=d1*d2*d3*100;
+        System.out.println("x:"+x+";y:"+y);
        return  y;
     }
-    public static double gamma(double x, double setAbsRelaErr) {
-        x -= 1;
-        double res = 0.0;
-        int i = 1;
-        double temp = 1.0;
-        double temp0 = 1.0;
-        double temp1 = 1.0;
-        temp = 1 / (x + 1);
-        do {
-            temp0 = temp * Math.pow(i, x);
-            i++;
-            temp *= i / (x + i);
-            temp1 = temp * Math.pow(i, x);
-        }while(Math.abs(temp1 - temp0) > 0.00001);
-        res = temp1;
-        return res;
-    }
+
     /**
      * 返回格式化JSON字符串。
      *
