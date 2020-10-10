@@ -32,12 +32,14 @@ public class ChanPinServiceImpl implements ChanPinService {
         return chanPinDao.getJiZhiDate(stationType, beginTime,endTime,stationNum);
     }
     public JSONArray getAvgMathDate(String stationType, String beginTime, String endTime, String stationNum,String obsv)throws  Exception{
-        JSONArray jsonArray;
+        JSONArray resultArray=new JSONArray();
+        JSONArray objectarr;
+        JSONObject jsonObject;
         String tiaojian="";
         String[] key=null;
         String tableName="surf_aws_month_data";
         if(obsv.equals("气温")){
-            tiaojian=",cast(AVG (surf.tem) as decimal(5, 1)) AS val,cast(AVG (surf.tem_max) as decimal(5, 1)) AS vmax,cast(AVG (surf.tem_min) as decimal(5, 1)) AS vmin ";
+            tiaojian=",cast(AVG (surf.tem_avg) as decimal(5, 1)) AS val,cast(AVG (surf.tem_max) as decimal(5, 1)) AS vmax,cast(AVG (surf.tem_min) as decimal(5, 1)) AS vmin ";
             key=new String[]{"math","val","vmax","vmin"};
         }else if(obsv.equals("风向")){
             String [] fangwei={"NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","N"};
@@ -52,15 +54,35 @@ public class ChanPinServiceImpl implements ChanPinService {
             Map<String,String> map=new HashMap<String,String>();
             map.put("降水量","pre_month");
             map.put("风速","win_s_avg_month");
-            map.put("气压","prs");
+            map.put("气压","prs_avg");
             map.put("日照时数","ssh");
-            map.put("相对湿度","rhu");
+            map.put("相对湿度","rhu_avg");
             if(map.containsKey(obsv)){
                 tiaojian=",cast(AVG (surf."+map.get(obsv)+") as decimal(5, 1)) AS val ";
             }
         }
-        jsonArray=chanPinDao.getAvgMathDate(beginTime,endTime,stationNum,tiaojian,key,tableName);
-        return  jsonArray;
+        List<Map<String,Object>>list=chanPinDao.getAvgMathDate(beginTime,endTime,stationNum,tiaojian,key,tableName);
+        for (int i=0;i<key.length;i++){
+            if(!key[i].equals("math")){
+                jsonObject=new JSONObject(true);
+                objectarr=new JSONArray();
+                Object object;
+                for (int j=0;j<12;j++){
+                    object=null;
+                    for(int k=0;k<list.size();k++){
+                        int month=Integer.parseInt(String.valueOf(list.get(k).get("math")));
+                        if(month==j+1){
+                            object=list.get(k).get(key[i]);
+                            break;
+                        }
+                    }
+                    objectarr.add(j,object);
+                }
+                jsonObject.put(key[i],objectarr);
+                resultArray.add(jsonObject);
+            }
+        }
+        return  resultArray;
     }
     //插入大标题
     public  void insertTitle(XWPFParagraph paragraph) {
@@ -201,6 +223,8 @@ public class ChanPinServiceImpl implements ChanPinService {
             array=getJiZhiDate(stationType,beginTime2,endTime2,stationNum);
         }else if(keyInParaText.equals("table1")){
             array=getSumYrarDate(stationType,beginTime,endTime,stationNum);
+        }else if(keyInParaText.endsWith("Tchart")){
+            array=getAvgMathDate(stationType,beginTime,endTime,stationNum,"气温");
         }
         return array;
     }
