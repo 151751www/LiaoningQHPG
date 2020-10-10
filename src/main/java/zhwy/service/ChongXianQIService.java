@@ -67,7 +67,7 @@ public class ChongXianQIService {
             y[i]=-Math.log(-Math.log(1-M[i]/(N+1)));
             y_temp[i]=M[i]/(N+1);
             bg= new BigDecimal(y_temp[i]);
-            y_temp[i]=bg.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
+            y_temp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
 
         double ave_x=GetAvgValue(temp);
@@ -130,6 +130,7 @@ public class ChongXianQIService {
         }
         JSONObject  jsonObject=new JSONObject(true);
         jsonObject.put("单位",odanwei);
+        jsonObject.put("xData",y_xp);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
         jsonObject.put("表格数据",arrayTable);
@@ -394,6 +395,7 @@ public class ChongXianQIService {
         }
         JSONObject  jsonObject=new JSONObject(true);
         jsonObject.put("单位",odanwei);
+        jsonObject.put("xData",y_xp);
         jsonObject.put("直线图",arrayxp);
         jsonObject.put("散点图",arraytemp);
         jsonObject.put("表格数据",arrayTable);
