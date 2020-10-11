@@ -351,7 +351,7 @@ public class ChongXianQIService {
             x_year[i]= (int) (1/y_xp[i]);
         }
         double[] x=li;
-        double[]temp=BubbleSort(x,"asc");
+        double[]temp=BubbleSort(x,"desc");
         double[] y_temp=new double[temp.length];
         for (int i=0;i<temp.length;i++){
             double countY=temp.length+1;
