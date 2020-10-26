@@ -1,5 +1,6 @@
 package zhwy.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -13,6 +14,8 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,13 +30,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Api(position = 9,tags = "辽宁气候评估----产品服务")
 @RestController
 @SessionAttributes
+@PropertySource("classpath:address.properties")
 @RequestMapping("/ChanpinFuWu")
 public class ChanPinController {
 
@@ -45,6 +52,13 @@ public class ChanPinController {
     private ChanPinService chanPinService;
     @Autowired
     private PoiUtils poiUtils;
+
+    @Value("${saveFolder}")
+    String saveFolder;
+
+    @Value("${wordpath}")
+    String wordpath;
+
 
 
     @ApiOperation(value = "气象要素累年值查询")
@@ -180,6 +194,29 @@ public class ChanPinController {
         }
         return  jsObject.toJSONString();
     }
+    @ApiOperation(value = "产品服务查询")
+    @PostMapping(value = "/getDateChar")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "stationType", value = "台站类型（国家站，区域站）", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "累年值开始时间 (年：yyyy）", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "累年值结束时间（年：yyyy）", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "stationNum", value = "台站号(54236,54668)", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "obsvName", value = "要素名称", required = true, paramType = "query", dataType = "String")
+    })
+    public String getDateChar(String stationType,String beginTime,String endTime,String stationNum,String obsvName)  {
+        //跨域
+        common.getCrossOrigin();
+        JSONObject jsObject=new JSONObject();
+        try {
+            JSONArray array=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,obsvName);
+            jsObject.put("查询成功",array.toJSONString());
+        }catch (Exception e){
+            logger.error("气象要素查询失败"+e.getMessage());
+            e.printStackTrace();
+            jsObject.put("查询失败","气象要素查询失败"+e.getMessage());
+        }
+        return  jsObject.toJSONString();
+    }
 
     @ApiOperation(value = "产品服务制作")
     @PostMapping(value = "/FileMake")
@@ -197,9 +234,10 @@ public class ChanPinController {
         Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}", Pattern.CASE_INSENSITIVE);
         XWPFDocument document = null;
         InputStream inputStream=null;
+        String path="";
 
         try {
-            String fileName="F://项目总览//辽宁//生态保护重大工程气候效应评估系统//12_成果截图和ppt//产品模板.docx";
+            String fileName=wordpath;
             File file = ResourceUtils.getFile(fileName);
             inputStream = new FileInputStream(file);
             document = new XWPFDocument(inputStream);
@@ -207,6 +245,7 @@ public class ChanPinController {
 
             Iterator<XWPFParagraph> itPara = document.getParagraphsIterator();
             String classPath = "zhwy.PoiForFile.Section";
+            String obsv="";
 
             //处理文字
             while (itPara.hasNext()) {
@@ -218,10 +257,30 @@ public class ChanPinController {
                 }
                 //提取出文档模板占位符中的章节标题
                 String keyInParaText = paraText.split("\\$\\{")[1].split("\\}")[0];
+                String ytitle="";
+                String Xarr[]=null;
                 if(keyInParaText.startsWith("section1")){
                     classPath = "zhwy.PoiForFile.Section1";
                 }else if(keyInParaText.startsWith("section2")){
                     classPath = "zhwy.PoiForFile.SectionTem";
+                    obsv="气温";
+                    ytitle="气温";
+                    Xarr=new String[]{"平均气温","最高气温","最低气温"};
+
+                }else if(keyInParaText.startsWith("section3")){
+                    classPath = "zhwy.PoiForFile.SectionPrepit";
+                    obsv="降水量";
+                    ytitle="降水量";
+                    Xarr=new String[]{beginTime+"~"+endTime};
+                }else if(keyInParaText.startsWith("section4")){
+                    classPath = "zhwy.PoiForFile.SectionWin";
+                    obsv="风速";
+                    ytitle="风速";
+                    if("section4chart4,section4chart5,section4chart6,section4chart7,section4chart8".indexOf(keyInParaText)!=-1){
+                        Xarr=new String[]{ "风向频率" };
+                    }else{
+                        Xarr=new String[]{beginTime+"~"+endTime};
+                    }
                 }
                 //如果占位符是大标题
                 if ("title".equalsIgnoreCase(keyInParaText)) {
@@ -242,14 +301,24 @@ public class ChanPinController {
                 //如果占位符代表章节文本描述
                 if (keyInParaText.contains("body")) {
                     BaseSection base = (BaseSection) Class.forName(classPath).newInstance();
-                    base.replaceBody(paragraph,keyInParaText,stationType,beginTime,endTime,beginTime2,endTime2,stationNum,stationName);
+                    JSONArray leinianzhi;
+                    JSONArray avgMonth;
+                    if(keyInParaText.equals("section4body4")){
+                        List<Map<String,Object>> list=chanPinService.getAvgYearDate(stationType,beginTime,endTime,stationNum,"风向");
+                        leinianzhi=JSONArray.parseArray(JSON.toJSONString(list));
+                        avgMonth=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,"风向");
+                    }else{
+                        leinianzhi=chanPinService.getSumYrarDate(stationType,beginTime,endTime,stationNum);
+                        avgMonth=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,obsv);
+                    }
+                    base.replaceBody(leinianzhi,avgMonth,paragraph,keyInParaText,stationType,beginTime,endTime,beginTime2,endTime2,stationNum,stationName);
                     continue;
                 }
                 //如果占位符代表表名
                 if (keyInParaText.contains("TableName")) {
                     if(keyInParaText.equals("TableName2")){
                         chanPinService.replaceTableName(paragraph,stationName,beginTime2+"~"+endTime2,keyInParaText);
-                    }else if(keyInParaText.equals("TableName1")){
+                    }else {
                         chanPinService.replaceTableName(paragraph,stationName,beginTime+"~"+endTime,keyInParaText);
                     }
                     continue;
@@ -263,16 +332,18 @@ public class ChanPinController {
                         tableTitle=new String[]{"气象要素","数值","出现时间"};
                     }else if(keyInParaText.equals("table1")){
                         tableTitle=new String[]{"气象要素","累年平均值"};
+                    }else if(keyInParaText.equals("table3")){
+                        tableTitle=new String[] { "风向","N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
                     }
                     chanPinService.insertTable(document, paragraph, array,tableTitle);
                     continue;
                 }
                 //如果占位符代表统计图
-                if (keyInParaText.endsWith("chart")) {
+                if (keyInParaText.indexOf("chart")>0&&keyInParaText.indexOf("chartName")==-1) {
                     paragraph.removeRun(0);
                     BaseSection base = (BaseSection) Class.forName(classPath).newInstance();
                     JSONArray array=chanPinService.getSectionData(keyInParaText,stationType,beginTime,endTime,beginTime2,endTime2,stationNum,stationName);
-                    base.replaceChart(document,array);
+                    base.replaceChart(keyInParaText,document,array,ytitle,Xarr,obsv);
                     continue;
                 }
                 //如果占位符代表图名
@@ -293,7 +364,7 @@ public class ChanPinController {
                     XWPFParagraph p = (XWPFParagraph) bodyElement;
                     String paraText = p.getText();
                     boolean flag = false;
-                    if (pattern.matcher(paraText).find()) {
+                    if (pattern.matcher(paraText).find()||"\\}".matches(paraText)||paraText.equals("")) {
                         flag = document.removeBodyElement(k);
                         if (flag) {
                             k--;
@@ -312,17 +383,26 @@ public class ChanPinController {
 
             //给章节与小节添加序号
             poiUtils.init(document);
-
+            Date date=new Date();
+            SimpleDateFormat sim=new SimpleDateFormat("yyyyMMddHHmmss");
+            String makedate=sim.format(date);
+            String saveutl=saveFolder+"word//"+stationName+makedate+".docx";
+            File ftemp = new File(saveFolder+"word");
+            if(!ftemp.exists()&&!ftemp.isDirectory()){
+                ftemp.mkdirs();
+            }
             //导出word文档
-            FileOutputStream docxFos = new FileOutputStream("D://test1.docx");
+            FileOutputStream docxFos = new FileOutputStream(saveutl);
             document.write(docxFos);
             docxFos.flush();
             docxFos.close();
             inputStream.close();
+
+            path=saveutl.replace(saveFolder,"/img/");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  "成功";
+        return  path;
     }
 
 }

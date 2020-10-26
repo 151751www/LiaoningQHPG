@@ -1,5 +1,6 @@
 package zhwy.PoiForFile;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
@@ -18,6 +19,7 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTTx;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextBody;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,53 +31,69 @@ public abstract class BaseSection {
     public abstract void replaceSectionTitle(XWPFDocument document, XWPFParagraph paragraph);
 
     //替换章节内容
-    public abstract void replaceBody(XWPFParagraph paragraph,String keyInParaText,String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName)throws  Exception;
+    public abstract void replaceBody(JSONArray leinianzhi,JSONArray avgMonth,XWPFParagraph paragraph,String keyInParaText,String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName)throws  Exception;
 
 
 
     //替换统计图数据
-    public  void replaceChart(XWPFDocument document,JSONArray array){
+    public  void replaceChart(String keyInParaText,XWPFDocument document,JSONArray array ,String ytitle,String [] xarr,String obsv) throws Exception{
         JSONObject object;
-        String[] series=null;
-        //x轴
-        String[] categories=new String[array.size()];
+        JSONArray jsonArray;
         List<Number[]> values = new ArrayList<>();
         Number[] value1;
-
-        for (int i=0;i<array.size();i++){
-            object=array.getJSONObject(i);
-            categories[i]=object.getString("math");
-            if(i==0){
-                series=new String[object.size()-1];
-                int obval=0;
-                for (Map.Entry<String,Object>map:object.entrySet()){
-                    if(obval!=0){
-                        series[obval-1]=map.getKey();
-                    }
-                    obval++;
-                }
-            }
-        }
-        for (int i=0;i<series.length;i++){
-            value1=new Number[array.size()];
-            for (int j=0;j<array.size();j++){
-                object=array.getJSONObject(j);
-                value1[j]=Double.parseDouble(object.getString(series[i]));
+        Object obj;
+        //x轴
+        String[] categories;
+        if("section4chart4,section4chart5,section4chart6,section4chart7,section4chart8".indexOf(keyInParaText)!=-1){
+            object=array.getJSONObject(0);
+            categories=new String[object.size()];
+            value1=new Number[object.size()];
+            int i=0;
+            Iterator iter = object.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                categories[i]=entry.getKey().toString();
+                value1[i]=Double.parseDouble(entry.getValue().toString());
+                i++;
             }
             values.add(value1);
-        }
-        try {
-            XWPFChart xChart = null;
-            for (POIXMLDocumentPart part : document.getCharts()) {
-                if (part instanceof XWPFChart) {
-                    xChart = (XWPFChart) part;
-                    generateChart(xChart, series,categories,values);
-
+        }else{
+            categories=new String[12];
+            for(int i=0;i<12;i++){
+                categories[i]=(i+1)+"";
+            }
+            for (int i=0;i<array.size();i++){
+                object=array.getJSONObject(i);
+                Iterator iter = object.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    jsonArray=JSONArray.parseArray(JSON.toJSONString(entry.getValue()));
+                    value1=new Number[jsonArray.size()];
+                    for (int j=0;j<jsonArray.size();j++){
+                        obj=jsonArray.get(j);
+                        if(obj!=null){
+                            value1[j]=Double.parseDouble(obj.toString());
+                        }else{
+                            value1[j]=null;
+                        }
+                    }
+                    values.add(value1);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
+        XWPFChart xChart;
+        for (POIXMLDocumentPart part : document.getCharts()) {
+            if (part instanceof XWPFChart) {
+                String key=part.toString().replaceAll("Name: /word/charts/","").replace("- Content Type: application/vnd.openxmlformats-officedocument.drawingml.chart+xml","").replace(".xml","").trim();
+                if(keyInParaText.indexOf(key)>0){
+                    xChart = (XWPFChart) part;
+                    generateChart(xChart, xarr,categories,values,ytitle);
+                    break;
+                }
+            }
+        }
+
     }
 
     /**
@@ -106,7 +124,7 @@ public abstract class BaseSection {
      * @param categories x轴
      * @param values 具体的值
      */
-    public void generateChart(XWPFChart chart, String[] series, String[] categories, List<Number[]> values) {
+    public void generateChart(XWPFChart chart, String[] series, String[] categories, List<Number[]> values,String ytitle)throws  Exception {
         String chartTitle="";
         List<XDDFChartData> data = chart.getChartSeries();
         XDDFChartData bar = data.get(0);

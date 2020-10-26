@@ -245,19 +245,19 @@ public class DataAvgAndMController {
         common.getCrossOrigin();
         JSONObject jsObject=new JSONObject();
         if(("时，日，年").indexOf(dataType)<0){
-            jsObject.put("上传失败","序列订正延长只支持小时数据，日数据，年数据");
+            jsObject.put("失败","序列订正延长只支持小时数据，日数据，年数据");
             return jsObject.toJSONString() ;
         }
         if(stationNum==null ||stationNum.equals("")){
-            jsObject.put("上传失败","请选择短序列文件所属的台站");
+            jsObject.put("失败","请选择短序列文件所属的台站");
             return jsObject.toJSONString() ;
         }
         if(obsveName==null ||obsveName.equals("")){
-            jsObject.put("上传失败","请选择短序列文件表示的要素");
+            jsObject.put("失败","请选择短序列文件表示的要素");
             return jsObject.toJSONString() ;
         }
         if(file==null){
-            jsObject.put("上传失败","短序列文件null");
+            jsObject.put("失败","短序列文件null");
             return jsObject.toJSONString() ;
         }
         String result=dataMethodService.getFileContent(file,"短序列",dataType);
@@ -276,9 +276,9 @@ public class DataAvgAndMController {
         }
         result=jsonArrayAfter.toJSONString();
         if("上传文件格式不正确".equals(result)){
-            jsObject.put("上传失败",result);
+            jsObject.put("失败",result);
         }else{
-            jsObject.put("上传成功",result);
+            jsObject.put("成功",result);
         }
         return jsObject.toJSONString() ;
     }
@@ -304,13 +304,13 @@ public class DataAvgAndMController {
             String tiaojian=", '"+stationNum+"' as 站号, '"+obsvName+"' as 要素 ";
             sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvval,"短序列",tiaojian,prarm);
             if(sequenceLlist.size()==0){
-                jsObject.put("查询失败","请重新选择需要查询的一段时间的短序列，原查询结果为空");
+                jsObject.put("失败","请重新选择需要查询的一段时间的短序列，原查询结果为空");
             }else{
-                jsObject.put("查询成功",sequenceLlist);
+                jsObject.put("成功",sequenceLlist);
             }
         }catch (Exception e){
             logger.error("短序列查询失败"+e.getMessage());
-            jsObject.put("查询失败","短序列查询失败"+e.getMessage());
+            jsObject.put("失败","短序列查询失败"+e.getMessage());
         }
         return jsObject.toJSONString();
     }
@@ -338,20 +338,20 @@ public class DataAvgAndMController {
             String [] prarm={"时间","长序列"};
             sequenceLlist = dataMethodService.getXulieYanchangData(stationType,timeType, beginTime, endTime, stationNum, obsvName,"长序列","",prarm);
             if(("时，日，年").indexOf(timeType)<0){
-                jsObject.put("查询失败","序列订正延长只支持小时数据，日数据，年数据");
+                jsObject.put("失败","序列订正延长只支持小时数据，日数据，年数据");
                 return jsObject.toJSONString();
             }
             if(sequenceLlist.size()>0){
                 List<Map<String,Object>> list =common.getList(sequenceLlist.toJSONString(),prarm);
                 result=getHebingXulieDate(list,sequenceSlist,timeType).replace("/","");
             }else{
-                jsObject.put("查询失败","长序列查询结果为null");
+                jsObject.put("失败","长序列查询结果为null");
                 result=jsObject.toJSONString();
             }
         }catch (Exception e){
             logger.error("查询长序列失败"+e.getMessage());
             e.printStackTrace();
-            jsObject.put("查询失败","上传长序列失败"+e.getMessage());
+            jsObject.put("失败","上传长序列失败"+e.getMessage());
             return  jsObject.toJSONString();
         }
         return  result;
@@ -374,16 +374,16 @@ public class DataAvgAndMController {
             sequenceS=URLDecoder.decode(sequenceS,"utf-8");
             sequenceSlist=common.getList(sequenceS,new String[]{"站号","时间","要素","短序列"});
             if(("时，日，年").indexOf(timeType)<0){
-                jsObject.put("上传失败","序列订正延长只支持小时数据，日数据，年数据");
+                jsObject.put("失败","序列订正延长只支持小时数据，日数据，年数据");
                 result= jsObject.toJSONString();
             }else{
                 String sequenceL=dataMethodService.getFileContent(file,"长序列",timeType);
                 List<Map<String,Object>> sequenceLlist=common.getList(sequenceL,new String[]{"时间","长序列"});
                 if(sequenceLlist.size()==0){
-                    jsObject.put("上传失败","请重新上传长序列文件，原长序列文件为null");
+                    jsObject.put("失败","请重新上传长序列文件，原长序列文件为null");
                     result= jsObject.toJSONString();
                 }else if(sequenceSlist.size()==0){
-                    jsObject.put("上传失败","请重新上传短序列文件，原短序列文件为null");
+                    jsObject.put("失败","请重新上传短序列文件，原短序列文件为null");
                     result= jsObject.toJSONString();
                 }else{
                     result=getHebingXulieDate(sequenceLlist,sequenceSlist,timeType);
@@ -402,10 +402,10 @@ public class DataAvgAndMController {
         try {
            List<Map<String,Object>>listResult=dataMethodService.getHeBingDataResult(sequenceLlist,sequenceSlist,timeType);
            if(listResult==null){
-               jsObject.put("上传失败","长序列结果集长度小于短序列结果集，无法做短序列订正延长，请重新查询或者上传长序列！");
+               jsObject.put("失败","长序列结果集长度小于短序列结果集，无法做短序列订正延长，请重新查询或者上传长序列！");
            }else if(listResult.size()>0){
                if(listResult.get(0).get("error")!=null){
-                   jsObject.put("上传失败",listResult.get(0).get("error"));
+                   jsObject.put("失败",listResult.get(0).get("error"));
                }else{
                    JSONObject hebingObject;
                    JSONArray jsonArray=new JSONArray();
@@ -416,12 +416,12 @@ public class DataAvgAndMController {
                        }
                        jsonArray.add(i,hebingObject);
                    }
-                   jsObject.put("上传成功",jsonArray.toString());
+                   jsObject.put("成功",jsonArray.toString());
                }
            }
        }catch (Exception e){
             logger.error("合并长段序列失败-----getHebingXulieDate"+e.getMessage());
-            jsObject.put("上传失败","上传长序列失败"+e.getMessage());
+            jsObject.put("失败","上传长序列失败"+e.getMessage());
        }
         return  jsObject.toJSONString();
     }

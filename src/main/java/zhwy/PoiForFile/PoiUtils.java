@@ -1,4 +1,5 @@
 package zhwy.PoiForFile;
+
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.stereotype.Component;
@@ -113,18 +114,18 @@ public class PoiUtils {
      * @param paragraph
      * @param text
      */
-    public  void setTextPro(XWPFParagraph paragraph, String text) {
+    public  void setTextPro(XWPFParagraph paragraph, String text) throws Exception{
         deleteRun(paragraph);
         /**3.插入新的Run即将新的文本插入段落*/
         XWPFRun createRun = paragraph.insertNewRun(0);
+       // text= URLDecoder.decode(text,"UTF-8");
         createRun.setText(text);
         XWPFRun separtor = paragraph.insertNewRun(1);
         /**两段之间添加换行*/
-        separtor.addBreak();
+        //separtor.addBreak();
         createRun.addTab();
-        createRun.setFontFamily("Calibri");
+        createRun.setFontFamily("宋体");
         createRun.setFontSize(12);
-
         paragraph.setFirstLineIndent(20);
         paragraph.setAlignment(ParagraphAlignment.BOTH);
         paragraph.setIndentationFirstLine(600);

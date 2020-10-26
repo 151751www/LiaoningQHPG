@@ -131,8 +131,8 @@ public class ChanPinDaoImpl implements ChanPinDao {
             map=generalDao.getDataList(buffer.toString());
 
             jsonObject.put("气象要素",obsvName[i]);
-            String time="";
-            String value="";
+            String time="-";
+            String value="-";
             if(map.size()>0){
                 time=strUtil.NullToSpace(String.valueOf(map.get(0).get("observe_time")));
                 if(obsvVal[i].equals("win_s_max_year")){
@@ -164,8 +164,8 @@ public class ChanPinDaoImpl implements ChanPinDao {
         return  jsonArray;
     }
 
-    public JSONArray getAvgMathDate( String beginTime, String endTime, String stationNum,String obsv,String[] key,String tableName)throws  Exception{
-        JSONArray jsonArray;
+    public List<Map<String,Object>> getAvgMathDate(String beginTime, String endTime, String stationNum, String obsv, String[] key, String tableName)throws  Exception{
+        List<Map<String,Object>> list;
         StringBuffer buffer=new StringBuffer();
         buffer.append("select DatePart (Month,observe_date) as math " );
         buffer.append(obsv);
@@ -178,8 +178,26 @@ public class ChanPinDaoImpl implements ChanPinDao {
         buffer.append("' and surf.station_num='");
         buffer.append(stationNum);
         buffer.append("' group by DatePart (Month,observe_date) ORDER BY DatePart(MONTH, observe_date)");
-        jsonArray= generalDao.getDataBySql(buffer.toString(),key);
-        return  jsonArray;
+        list= generalDao.getDataList(buffer.toString());
+        return  list;
+    }
+
+    public List<Map<String,Object>> getAvgYearDate(String beginTime, String endTime, String stationNum, String obsv, String tableName)throws  Exception{
+        List<Map<String,Object>> list;
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("select " );
+        buffer.append(obsv);
+        buffer.append(" from ");
+        buffer.append(tableName);
+        buffer.append(" surf where surf.observe_date>='");
+        buffer.append(beginTime);
+        buffer.append("'and surf.observe_date<='");
+        buffer.append(endTime);
+        buffer.append("' and surf.station_num='");
+        buffer.append(stationNum);
+        buffer.append("'");
+        list= generalDao.getDataList(buffer.toString());
+        return  list;
     }
 
 }
