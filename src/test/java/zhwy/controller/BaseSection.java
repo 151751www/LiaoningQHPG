@@ -64,9 +64,9 @@ public abstract class BaseSection {
         String[] categories={"星期一","星期二","星期三","星期四","星期五","星期六","星期日"};
         List<Number[]> values = new ArrayList<>();
         //一周的销售量
-        Number[] value1 = {60,80,74,52,66,88,90};
+        Number[] value1 = {60,null,74,52,66,88,90};
         //一周的销售额
-        Number[] value2 = {450.2,652.1,554,384.6,486.5,688.9,711.1};
+        Number[] value2 = {450.2,652.1,null,384.6,486.5,688.9,711.1};
         //一周的净盈利额
         Number[] value3 = {200.2,326.4,266,159.5,222.2,355.5,369.5};
 

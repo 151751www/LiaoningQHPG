@@ -169,14 +169,17 @@ public class PoiUtils {
     public  void setTableOrChartTitle(XWPFParagraph paragraph, String text) {
         /**1.将段落原有文本(原有所有的Run)全部删除*/
         deleteRun(paragraph);
-        XWPFRun createRun = paragraph.insertNewRun(0);
-        createRun.setText(text);
-        XWPFRun separtor = paragraph.insertNewRun(1);
+        XWPFRun separtor = paragraph.insertNewRun(0);
         /**两段之间添加换行*/
         separtor.setText("\r");
+        XWPFRun createRun = paragraph.insertNewRun(1);
+        createRun.setText(text);
         createRun.setFontFamily("宋体");
         createRun.setFontSize(12);
         createRun.setBold(true);
+        XWPFRun separtor2 = paragraph.insertNewRun(2);
+        /**两段之间添加换行*/
+        separtor2.setText("\r");
         paragraph.setSpacingAfter(10);
         paragraph.setSpacingBefore(10);
         paragraph.setAlignment(ParagraphAlignment.CENTER);
@@ -446,4 +449,7 @@ public class PoiUtils {
         }
         return order;
     }
+
+
+
 }

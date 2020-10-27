@@ -253,29 +253,82 @@ public class ChanPinServiceImpl implements ChanPinService {
         CTBorder bBc0 = ctBorderc0.addNewBottom();
         bBc0.setVal(STBorder.Enum.forString("thick"));
         bBc0.setSz(new BigInteger("8"));
-        for (int i = 1; i < tableTitle.length; i++) {
-            XWPFTableCell cell = row.addNewTableCell();
-            tcpr = cell.getCTTc().addNewTcPr();
-            cell.setText(tableTitle[i]);
-            CTTcBorders ctBorder = tcpr.addNewTcBorders();
-            CTBorder bB = ctBorder.addNewBottom();
-            bB.setVal(STBorder.Enum.forString("thick"));
-            bB.setSz(new BigInteger("8"));
-            if (tableTitle.length == 2) {
-                CTTblWidth cellw = tcpr.addNewTcW();
-                cellw.setType(STTblWidth.DXA);
-                cellw.setW(BigInteger.valueOf(650 * 5));
-            } else {
+        XWPFTableCell cell ;
+        if(tableTitle.length>10){
+            for (int i = 1; i < 10; i++) {
+                cell = row.addNewTableCell();
+                tcpr = cell.getCTTc().addNewTcPr();
+                cell.setText(tableTitle[i]);
+                CTTcBorders ctBorder = tcpr.addNewTcBorders();
+                CTBorder bB = ctBorder.addNewBottom();
+                bB.setVal(STBorder.Enum.forString("thick"));
+                bB.setSz(new BigInteger("8"));
                 table.setWidth(8000);
             }
-        }
-        for (int i = 0; i < list.size(); i++) {
-            row = table.createRow();
-            String[] obj = list.get(i);
-            for (int j = 0; j < obj.length; j++) {
-                row.getCell(j).setText(obj[j]);
+            for (int i = 0; i < list.size(); i++) {
+                row = table.createRow();
+                String[] obj = list.get(i);
+                for (int j = 0; j < 10; j++) {
+                    row.getCell(j).setText(obj[j]);
+                }
+            }
+            XWPFTableRow row2 = table.createRow();
+            XWPFTableCell cel2;
+            for (int i = 10; i < 20; i++) {
+                cel2 = row2.getCell(i-10);
+                tcpr = cel2.getCTTc().addNewTcPr();
+                if(i==10){
+                    cel2.setText(tableTitle[0]);
+                }else if (i<tableTitle.length+1){
+                    cel2.setText(tableTitle[i-1]);
+                }
+
+                CTTcBorders ctBorder = tcpr.addNewTcBorders();
+                CTBorder bB = ctBorder.addNewBottom();
+                bB.setVal(STBorder.Enum.forString("thick"));
+                bB.setSz(new BigInteger("8"));
+                CTBorder bf = ctBorder.addNewTop();
+                bf.setVal(STBorder.Enum.forString("thick"));
+                bf.setSz(new BigInteger("10"));
+                table.setWidth(8000);
+            }
+            for (int i = 0; i < list.size(); i++) {
+                row = table.createRow();
+                String[] obj = list.get(i);
+                for (int j = 10; j < 20; j++) {
+                    if(j==10){
+                        row.getCell(j-10).setText(obj[0]);
+                    }else if(j<obj.length+1){
+                        row.getCell(j-10).setText(obj[j-1]);
+                    }
+                }
+            }
+        }else{
+            for (int i = 1; i < tableTitle.length; i++) {
+                 cell = row.addNewTableCell();
+                tcpr = cell.getCTTc().addNewTcPr();
+                cell.setText(tableTitle[i]);
+                CTTcBorders ctBorder = tcpr.addNewTcBorders();
+                CTBorder bB = ctBorder.addNewBottom();
+                bB.setVal(STBorder.Enum.forString("thick"));
+                bB.setSz(new BigInteger("8"));
+                if (tableTitle.length == 2) {
+                    CTTblWidth cellw = tcpr.addNewTcW();
+                    cellw.setType(STTblWidth.DXA);
+                    cellw.setW(BigInteger.valueOf(650 * 5));
+                } else {
+                    table.setWidth(8000);
+                }
+            }
+            for (int i = 0; i < list.size(); i++) {
+                row = table.createRow();
+                String[] obj = list.get(i);
+                for (int j = 0; j < obj.length; j++) {
+                    row.getCell(j).setText(obj[j]);
+                }
             }
         }
+
     }
 
     public JSONArray getSectionData(String keyInParaText, String stationType, String beginTime, String endTime, String beginTime2, String endTime2, String stationNum, String stationName) throws Exception {

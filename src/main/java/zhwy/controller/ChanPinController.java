@@ -7,10 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.xwpf.usermodel.BodyElementType;
-import org.apache.poi.xwpf.usermodel.IBodyElement;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -340,12 +337,16 @@ public class ChanPinController {
                 }
                 //如果占位符代表统计图
                 if (keyInParaText.indexOf("chart")>0&&keyInParaText.indexOf("chartName")==-1) {
-                    paragraph.removeRun(0);
+                    int l=paragraph.getRuns().size();
+                    for (int i=0;i<l-2;i++){
+                        paragraph.removeRun(0);
+                    }
                     BaseSection base = (BaseSection) Class.forName(classPath).newInstance();
                     JSONArray array=chanPinService.getSectionData(keyInParaText,stationType,beginTime,endTime,beginTime2,endTime2,stationNum,stationName);
                     base.replaceChart(keyInParaText,document,array,ytitle,Xarr,obsv);
                     continue;
                 }
+
                 //如果占位符代表图名
                 if (keyInParaText.contains("chartName")) {
                     BaseSection base = (BaseSection) Class.forName(classPath).newInstance();
@@ -364,7 +365,7 @@ public class ChanPinController {
                     XWPFParagraph p = (XWPFParagraph) bodyElement;
                     String paraText = p.getText();
                     boolean flag = false;
-                    if (pattern.matcher(paraText).find()||"\\}".matches(paraText)||paraText.equals("")) {
+                    if (pattern.matcher(paraText).find()) {
                         flag = document.removeBodyElement(k);
                         if (flag) {
                             k--;
