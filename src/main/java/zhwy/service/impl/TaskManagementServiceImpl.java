@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-public class TaskManagementServiceimpl  implements TaskManagementService {
+public class TaskManagementServiceImpl implements TaskManagementService {
     @Autowired
     public TaskDao taskDao;
     /**
@@ -71,8 +71,6 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
             task.setName(taskName);
             task.setType(type);
             task.setState("全部准备就绪");
-            task.setLastTime(startTime);
-            task.setNextTime(startTime);
             task.setPlanFre("每隔"+repeatInterval+dateType+"执行一次");
             task.setBeginTime(startTime);
             task.setStopTime(stopTime);
@@ -92,12 +90,13 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                 result=WinTaskUtil.deleteWinTask(taskName);
             }
         }else if("修改".equals(operationType)){
+            if("".equals(newName)){
+                newName=taskName;
+            }
             //修改数据库中的任务计划
             Task task=new Task();
             task.setName(newName);
             task.setState("全部准备就绪");
-            task.setLastTime(startTime);
-            task.setNextTime(startTime);
             task.setPlanFre("每隔"+repeatInterval+dateType+"执行一次");
             task.setDataTime(startTime);
             task.setBeginTime(startTime);
@@ -181,23 +180,27 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
         //获取任务类型数量
         List<Map<String,Object>> mapList=taskDao.selectType();
         if(mapList!=null&&mapList.size()>0){
+            JSONArray array;
             for(int i=0;i<mapList.size();i++){
-                JSONArray array=taskDao.selectTasks("",(String)mapList.get(i).get("type"));
-                //计算上次执行时间，下次执行时间
+                array=taskDao.selectTasks("",(String)mapList.get(i).get("type"));
+                //计算应入库和实入库
                 array=calDate(array);
                 jsonObject.put((String)mapList.get(i).get("type"),array);
             }
+
         }
         return jsonObject;
     }
 
     public JSONArray calDate(JSONArray array){
+        //计算国家站和区域站的应入库和实入库数量
         if(array!=null &&array.size()>0){
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             long now=new Date().getTime();
             String repeat;
             String dateType;
+            String lastTime = null;
             for (Object o : array) {
                 JSONObject jsonObject = (JSONObject) o;
                 //启用和禁用改为布尔类型
@@ -230,9 +233,10 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                         long difference = (now - startDate) / repeatNum;
 
                         calendar.setTimeInMillis(startDate + difference * repeatNum);
-                        jsonObject.put("lastTime", sdf.format(calendar.getTime()));
+                        lastTime=sdf.format(calendar.getTime());
+                        /*jsonObject.put("lastTime", sdf.format(calendar.getTime()));
                         calendar.setTimeInMillis(startDate + (difference + 1) * repeatNum);
-                        jsonObject.put("nextTime", sdf.format(calendar.getTime()));
+                        jsonObject.put("nextTime", sdf.format(calendar.getTime()));*/
                     } else {
                         if ("月".equals(dateType)) {
                             calendar.setTimeInMillis(now);
@@ -245,20 +249,43 @@ public class TaskManagementServiceimpl  implements TaskManagementService {
                             int month = difference % 12;
                             calStart.add(Calendar.YEAR, year);
                             calStart.add(Calendar.MONTH, month);
-                            jsonObject.put("lastTime", sdf.format(calStart.getTime()));
+                            lastTime=sdf.format(calStart.getTime());
+                            /*jsonObject.put("lastTime", sdf.format(calStart.getTime()));
                             calStart.add(Calendar.MONTH, Integer.parseInt(repeat));
-                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));
+                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));*/
                         } else if ("年".equals(dateType)) {
                             Calendar calStart = Calendar.getInstance();
                             calStart.setTime(sdf.parse((String) jsonObject.get("beginTime")));
                             int difference = (calendar.get(Calendar.YEAR) - calStart.get(Calendar.YEAR)) /
                                     Integer.parseInt(repeat);
                             calStart.add(Calendar.YEAR, difference * (Integer.parseInt(repeat)));
-                            jsonObject.put("lastTime", sdf.format(calStart.getTime()));
+                            lastTime=sdf.format(calStart.getTime());
+                            /*jsonObject.put("lastTime", sdf.format(calStart.getTime()));
                             calStart.add(Calendar.YEAR, Integer.parseInt(repeat));
-                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));
+                            jsonObject.put("nextTime", sdf.format(calStart.getTime()));*/
                         }
                     }
+                    jsonObject.put("repeatInterval", repeat);
+                    jsonObject.put("dateType", dateType);
+
+                    String tableName = "meto_surf_aws_info",selectCondi = "";
+                    int sumCount,actualCount;
+                    if(jsonObject.getString("name").contains("区域站")){
+                        tableName="meto_surf_reg_info";
+                    }
+                    sumCount=taskDao.selectDataInCount(tableName,"");
+                    if(dateType.equals("小时")){
+                        selectCondi=" where hour_data_last_time >= CONVERT (datetime,'"+lastTime+"',20) ";
+                    }else if(dateType.equals("日")){
+                        selectCondi=" where day_data_last_time >= CONVERT (datetime,'"+lastTime+"',20) ";
+                    }else if(dateType.equals("月")){
+                        selectCondi=" where month_data_last_time >= CONVERT (datetime,'"+lastTime+"',20) ";
+                    }else if(dateType.equals("年")){
+                        selectCondi=" where year_data_last_time >= CONVERT (datetime,'"+lastTime+"',20) ";
+                    }
+                    actualCount=taskDao.selectDataInCount(tableName,selectCondi);
+                    jsonObject.put("sumCount", sumCount);
+                    jsonObject.put("actualCount", actualCount);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

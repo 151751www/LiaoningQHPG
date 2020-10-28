@@ -34,13 +34,13 @@ public class TaskDaoImpl implements TaskDao {
         if(!"".equals(type)){
             name=name+" and type='"+type+"' ";
         }
-        String sql="select name,state,CONVERT (VARCHAR(100), lastTime, 20) AS lastTime," +
-                "CONVERT (VARCHAR(100), nextTime, 20) AS nextTime ,planFre,\n" +
+        String sql="select name,state,planFre,\n" +
                 "CONVERT (VARCHAR(100), beginTime, 20) AS beginTime,CONVERT (VARCHAR(100), stopTime, 20) AS stopTime," +
-                "CONVERT (VARCHAR(100), dataTime, 20) AS dataTime,isstart,isdisable  from task_info where 1=1  "+name;
+                "CONVERT (VARCHAR(100), dataTime, 20) AS dataTime,execScript ,isstart,isdisable  from task_info " +
+                "where 1=1  "+name;
 
-        String [] keys={"name","state","lastTime","nextTime","planFre","beginTime","stopTime","dataTime","isstart",
-                "isdisable"};
+        String [] keys={"name","state","planFre","beginTime","stopTime","dataTime","execScript",
+                "isstart","isdisable"};
 
         try {
             array=generalDao.getDataBySql(sql,keys);
@@ -60,12 +60,12 @@ public class TaskDaoImpl implements TaskDao {
             if((int)map.get("num")!=0){
                 result="已存在该任务计划！";
             }else{
-                Object [] arr={task.getName(),task.getType(),task.getState(),task.getLastTime(),task.getNextTime(),task.getPlanFre(),
+                Object [] arr={task.getName(),task.getType(),task.getState(),task.getPlanFre(),
                         task.getBeginTime(),task.getStopTime(),task.getDataTime(),task.getExec(),task.getIsstart(),
                         task.getIsdisable()};
-                sql="insert into task_info (name,type,state,lastTime,nextTime,planFre,beginTime,stopTime,dataTime,execScript," +
+                sql="insert into task_info (name,type,state,planFre,beginTime,stopTime,dataTime,execScript," +
                         "isstart,isdisable) " +
-                        "values (?,?,?,?,?,?,?,?,?,?,?,?)";
+                        "values (?,?,?,?,?,?,?,?,?,?)";
                 int num=generalDao.updateSql(sql,arr);
                 if(num>0){
                     result="OK";
@@ -101,8 +101,6 @@ public class TaskDaoImpl implements TaskDao {
         List<Object> list=new ArrayList<Object>();
         list.add(task.getName());
         list.add(task.getState());
-        list.add(task.getLastTime());
-        list.add(task.getNextTime());
         list.add(task.getPlanFre());
         list.add(task.getBeginTime());
         list.add(task.getStopTime());
@@ -111,7 +109,7 @@ public class TaskDaoImpl implements TaskDao {
         list.add(task.getIsstart());
         list.add(task.getIsdisable());
         list.add(name);
-        String [] arrStr={"name","state","lastTime","nextTime","planFre","beginTime","stopTime","dataTime","execScript",
+        String [] arrStr={"name","state","planFre","beginTime","stopTime","dataTime","execScript",
                 "isstart","isdisable"};
         StringBuffer sb=new StringBuffer("update task_info set ");
         int j=0;
@@ -158,12 +156,27 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public List<Map<String,Object>> selectType() {
         List<Map<String,Object>> mapList=null;
-        String sql="select distinct type from task_info";
+        String sql="select distinct type from task_info order by type ";
         try{
             mapList=generalDao.getDataList(sql);
         }catch (Exception e ){
             e.printStackTrace();
         }
         return mapList;
+    }
+
+    @Override
+    public int selectDataInCount(String tableName, String selectCondi) {
+        int num=0;
+        String sql="select count(*) as num from "+tableName+selectCondi;
+        try{
+            Map<String,Object> map=generalDao.getDataMap(sql);
+            if(map!=null&&map.size()>0){
+                num= (int) map.get("num");
+            }
+        }catch (Exception e ){
+            e.printStackTrace();
+        }
+        return num;
     }
 }

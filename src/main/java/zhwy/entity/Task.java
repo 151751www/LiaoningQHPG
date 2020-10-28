@@ -4,8 +4,6 @@ public class Task {
     private String name;
     private String type;
     private String state;
-    private String lastTime;
-    private String nextTime;
     private String planFre;
     private String beginTime;
     private String stopTime;
@@ -39,22 +37,6 @@ public class Task {
 
     public void setState(String state) {
         this.state = state;
-    }
-
-    public String getLastTime() {
-        return lastTime;
-    }
-
-    public void setLastTime(String lastTime) {
-        this.lastTime = lastTime;
-    }
-
-    public String getNextTime() {
-        return nextTime;
-    }
-
-    public void setNextTime(String nextTime) {
-        this.nextTime = nextTime;
     }
 
     public String getPlanFre() {
