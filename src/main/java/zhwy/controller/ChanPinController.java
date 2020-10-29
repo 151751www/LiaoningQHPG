@@ -278,6 +278,21 @@ public class ChanPinController {
                     }else{
                         Xarr=new String[]{beginTime+"~"+endTime};
                     }
+                }else if(keyInParaText.startsWith("section5")){
+                    classPath = "zhwy.PoiForFile.SectionSun";
+                    obsv="日照时数";
+                    ytitle="日照时数";
+                    Xarr=new String[]{beginTime+"~"+endTime};
+                }else if(keyInParaText.startsWith("section6")){
+                    classPath = "zhwy.PoiForFile.SectionHumi";
+                    obsv="相对湿度";
+                    ytitle="日照时数";
+                    Xarr=new String[]{beginTime+"~"+endTime,beginTime2+"~"+endTime2};
+                }else if(keyInParaText.startsWith("section7")){
+                    classPath = "zhwy.PoiForFile.SectionP";
+                    obsv="气压";
+                    ytitle="气压";
+                    Xarr=new String[]{beginTime+"~"+endTime};
                 }
                 //如果占位符是大标题
                 if ("title".equalsIgnoreCase(keyInParaText)) {
@@ -304,6 +319,10 @@ public class ChanPinController {
                         List<Map<String,Object>> list=chanPinService.getAvgYearDate(stationType,beginTime,endTime,stationNum,"风向");
                         leinianzhi=JSONArray.parseArray(JSON.toJSONString(list));
                         avgMonth=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,"风向");
+                    }else if(keyInParaText.startsWith("section5body")){
+                        List<Map<String,Object>> list=chanPinService.getAvgYearDate(stationType,beginTime,endTime,stationNum,"日照时数");
+                        leinianzhi=JSONArray.parseArray(JSON.toJSONString(list));
+                        avgMonth=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,"日照时数");
                     }else{
                         leinianzhi=chanPinService.getSumYrarDate(stationType,beginTime,endTime,stationNum);
                         avgMonth=chanPinService.getAvgMathDate(stationType,beginTime,endTime,stationNum,obsv);

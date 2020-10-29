@@ -100,7 +100,7 @@ public class PoiUtils {
         separtor.setText("\r");
         createRun.setFontSize(16);
         createRun.setBold(true);
-        createRun.setFontFamily("楷体_GB2312");
+        createRun.setFontFamily("黑体");
         paragraph.setIndentationFirstLine(600);
         paragraph.setSpacingAfter(10);
         paragraph.setSpacingBefore(10);

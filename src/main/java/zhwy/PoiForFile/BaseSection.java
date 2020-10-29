@@ -58,7 +58,7 @@ public abstract class BaseSection {
             }
             values.add(value1);
         }else{
-            categories=new String[12];
+            categories=new String[12];//横坐标
             for(int i=0;i<12;i++){
                 categories[i]=(i+1)+"";
             }

@@ -110,24 +110,20 @@ public class ChanPinServiceImpl implements ChanPinService {
 
     public List<Map<String, Object>> getAvgYearDate(String stationType, String beginTime, String endTime, String stationNum, String obsv) throws Exception {
         JSONArray resultArray = new JSONArray();
-        JSONArray objectarr;
-        JSONObject jsonObject;
         String tiaojian = "";
-        String[] key = null;
         String tableName = "surf_aws_year_data";
         if (obsv.equals("气温")) {
             tiaojian = ",cast(AVG (surf.tem_avg) as decimal(5, 1)) AS val,cast(AVG (surf.tem_max) as decimal(5, 1)) AS vmax,cast(AVG (surf.tem_min) as decimal(5, 1)) AS vmin ";
-            key = new String[]{"math", "val", "vmax", "vmin"};
         } else if (obsv.equals("风向")) {
             String[] fangwei = {"NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N"};
-            key = new String[fangwei.length];
             for (int i = 0; i < fangwei.length; i++) {
                 tiaojian += ",cast(AVG(surf.win_" + fangwei[i] + "_freq) as decimal(5, 1)) as " + fangwei[i];
-                key[i] = fangwei[i];
             }
-            if (tiaojian.startsWith(",")) {
-                tiaojian = tiaojian.substring(1);
-            }
+        } else if(obsv.equals("日照时数")){
+            tiaojian = ",cast(AVG (surf.ssh) as decimal(5, 1)) AS val ";
+        }
+        if (tiaojian.startsWith(",")) {
+            tiaojian = tiaojian.substring(1);
         }
         List<Map<String, Object>> list = chanPinDao.getAvgYearDate(beginTime, endTime, stationNum, tiaojian, tableName);
 
@@ -240,11 +236,11 @@ public class ChanPinServiceImpl implements ChanPinService {
 
         CTBorder tBorder = borders.addNewTop();
         tBorder.setVal(STBorder.Enum.forString("thick"));
-        tBorder.setSz(new BigInteger("10"));
+        tBorder.setSz(new BigInteger("20"));
 
         CTBorder bBorder = borders.addNewBottom();
         bBorder.setVal(STBorder.Enum.forString("thick"));
-        bBorder.setSz(new BigInteger("10"));
+        bBorder.setSz(new BigInteger("20"));
         CTTcPr tcpr;
 
         row.getCell(0).setText(tableTitle[0]);
@@ -289,7 +285,7 @@ public class ChanPinServiceImpl implements ChanPinService {
                 bB.setSz(new BigInteger("8"));
                 CTBorder bf = ctBorder.addNewTop();
                 bf.setVal(STBorder.Enum.forString("thick"));
-                bf.setSz(new BigInteger("10"));
+                bf.setSz(new BigInteger("20"));
                 table.setWidth(8000);
             }
             for (int i = 0; i < list.size(); i++) {
@@ -360,6 +356,15 @@ public class ChanPinServiceImpl implements ChanPinService {
         }else if (keyInParaText.endsWith("chart8")) {
             array = getAvgMathDate(stationType, beginTime, endTime, stationNum, "风向");
             array=getWin_d_jijie(array,0);//冬为第一个季节  0表示冬
+        }else if (keyInParaText.endsWith("chart9")) {
+            array = getAvgMathDate(stationType, beginTime, endTime, stationNum, "日照时数");
+        }else if (keyInParaText.endsWith("chart10")) {
+            array = getAvgMathDate(stationType, beginTime, endTime, stationNum, "相对湿度");
+            JSONArray array2=getAvgMathDate(stationType, beginTime2, endTime2, stationNum, "相对湿度");
+            JSONObject object=array2.getJSONObject(0);
+            array.add(1,object);
+        } else if (keyInParaText.endsWith("chart11")) {
+            array = getAvgMathDate(stationType, beginTime, endTime, stationNum, "气压");
         }
         return array;
     }

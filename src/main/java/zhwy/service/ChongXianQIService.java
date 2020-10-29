@@ -111,7 +111,7 @@ public class ChongXianQIService {
                     jsonTable.put(String.valueOf((int)x_year[i]),xp[i]);
                 }
             }
-            jsonObjectxp.put("y_xp",y_xp[i]);
+            jsonObjectxp.put("y_xp",-Math.log(-Math.log(y_xp[i])) );
             jsonObjectxp.put("xp",xp[i]);
         }
         arrayTable.add(jsonTable);
