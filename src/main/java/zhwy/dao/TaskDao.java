@@ -12,4 +12,5 @@ public interface TaskDao {
     String updateTask(Task task,String name);
     String selectTasksExe(String name);
     List<Map<String,Object>> selectType();
+    int selectDataInCount(String tableName,String selectCondi);
 }
