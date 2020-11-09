@@ -36,11 +36,11 @@ public class TaskDaoImpl implements TaskDao {
         }
         String sql="select name,state,planFre,\n" +
                 "CONVERT (VARCHAR(100), beginTime, 20) AS beginTime,CONVERT (VARCHAR(100), stopTime, 20) AS stopTime," +
-                "CONVERT (VARCHAR(100), dataTime, 20) AS dataTime,execScript ,isstart,isdisable  from task_info " +
+                "CONVERT (VARCHAR(100), dataTime, 20) AS dataTime,execScript ,isstart,isdisable,type  from task_info " +
                 "where 1=1  "+name;
 
         String [] keys={"name","state","planFre","beginTime","stopTime","dataTime","execScript",
-                "isstart","isdisable"};
+                "isstart","isdisable","type"};
 
         try {
             array=generalDao.getDataBySql(sql,keys);
