@@ -206,9 +206,9 @@ public class SectionWin extends BaseSection {
         int year=Integer.parseInt(endTime)-Integer.parseInt(beginTime)+1;
         String chartName="";
         if(keyInParaText.endsWith("chartName1")){
-            chartName=stationName+"气象站累年各月平均风速";
+            chartName="图5.1 "+stationName+"气象站累年各月平均风速";
         }else if(keyInParaText.endsWith("chartName")){
-            chartName=stationName+"近"+year+"年的年、季风向频率";
+            chartName="图5.2 "+stationName+"近"+year+"年的年、季风向频率";
         }
         poiUtils.setTableOrChartTitle(paragraph,chartName);
     }

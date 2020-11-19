@@ -99,7 +99,7 @@ public class SectionTem extends BaseSection {
     @Override
     public void replaceChartName(XWPFParagraph paragraph,String keyInParaText,String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName) {
         int year=Integer.parseInt(endTime)-Integer.parseInt(beginTime)+1;
-        String chartName=stationName+"气象站各月累年平均气温、最高气温、最低气温（近"+year+"年）";
+        String chartName="图5.6 "+stationName+"气象站各月累年平均气温、最高气温、最低气温（近"+year+"年）";
         poiUtils.setTableOrChartTitle(paragraph,chartName);
     }
 }

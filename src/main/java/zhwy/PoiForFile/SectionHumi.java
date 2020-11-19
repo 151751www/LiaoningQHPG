@@ -61,7 +61,7 @@ public class SectionHumi extends BaseSection {
 
     @Override
     public void replaceChartName(XWPFParagraph paragraph,String keyInParaText,String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName) {
-        String chartName=stationName+"气象站各月累年平均相对湿度";
+        String chartName="图5.10 "+stationName+"气象站各月累年平均相对湿度";
         poiUtils.setTableOrChartTitle(paragraph,chartName);
     }
 }

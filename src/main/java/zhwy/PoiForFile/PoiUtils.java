@@ -186,6 +186,9 @@ public class PoiUtils {
         paragraph.setSpacingAfter(10);
         paragraph.setSpacingBefore(10);
         paragraph.setAlignment(ParagraphAlignment.CENTER);
+        CTFonts font = createRun.getCTR().addNewRPr().addNewRFonts();
+        font.setEastAsia("宋体");
+        font.setAscii("Calibri (西文正文)");
     }
 
     public void deleteRun(XWPFParagraph paragraph) {
