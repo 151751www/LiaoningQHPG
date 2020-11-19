@@ -204,7 +204,12 @@ public class SectionWin extends BaseSection {
     @Override
     public void replaceChartName(XWPFParagraph paragraph,String keyInParaText,String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName) {
         int year=Integer.parseInt(endTime)-Integer.parseInt(beginTime)+1;
-        String chartName=stationName+"近"+year+"年的年、季风向频率";
+        String chartName="";
+        if(keyInParaText.endsWith("chartName1")){
+            chartName=stationName+"气象站累年各月平均风速";
+        }else if(keyInParaText.endsWith("chartName")){
+            chartName=stationName+"近"+year+"年的年、季风向频率";
+        }
         poiUtils.setTableOrChartTitle(paragraph,chartName);
     }
 }

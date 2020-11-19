@@ -9,18 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import zhwy.controller.HuiTuGongJuController;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import javax.imageio.ImageIO;
 
 
 @Component
@@ -52,6 +49,18 @@ public class MakeGradsFile {
     //shpPath的路径
     @Value("${shpPath}")
     String shpPath;
+    @Value("${imgPath}")
+    String imgPath;
+    @Value("${shuZhiChanPinPath}")
+    String shuZhiChanPinPath;
+    @Value("${eraPath}")
+    String eraPath;
+    @Value("${colorsPath}")
+    String colorsPath;
+    @Value("${liaoningcityPath}")
+    String liaoningcityPath;
+
+
 
     public String drawGeDianPic(double[][] arrValue,String latLonStr,String colorStr,String steps,JSONArray latLonJSON) throws Exception{
         /*//获取系统时间
@@ -134,7 +143,7 @@ public class MakeGradsFile {
         if(gsText.exists()){
            // gsText.delete();
         }
-        String path=picPath.replace(saveFolder,"/img/");
+        String path=picPath.replace(imgPath,"/img/");
         return path;
     }
 
@@ -228,7 +237,7 @@ public class MakeGradsFile {
         else{
             picPath="";
         }
-        String path=picPath.replace(saveFolder,"/img/");
+        String path=picPath.replace(imgPath,"/img/");
         return path;
     }
 
@@ -384,6 +393,93 @@ public class MakeGradsFile {
             out.write(switchint2byte(nlev));
             out.write(switchint2byte(nflag));
         }
+        out.close();
+    }
+
+    public String drawShuZhiChanPinPic(String timeType, String sttime, String dateType,String obsv,String hig  ) throws Exception{
+        //获取系统时间
+        Date curDate = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssddd");
+        String time = sdf.format(curDate);
+
+        InetAddress address = InetAddress.getLocalHost();
+        String hostAddress = address.getHostAddress(); //返回IP地址
+        File f = new File(shuZhiChanPinPath);
+        if(!f.exists()&&!f.isDirectory()){
+            f.mkdirs();
+        }
+        String gsPath=shuZhiChanPinPath +"Shuzhi"+time+".gs";
+        String picPath=shuZhiChanPinPath+ "Shuzhi"+time+".png";
+        String ePath="";
+        if(obsv.equals("气温")||obsv.equals("气压")){
+            ePath=eraPath+"temperaturePressure/"+sttime+".nc";
+        }else if(obsv.equals("10m风速")){
+            ePath=eraPath+"wind/"+sttime+".nc";
+        }
+        File efile=new File(ePath);
+        if(!efile.exists()){
+            return "生成图片失败，查不到该时间下的数据文件";
+        }
+
+        //生成对应的gs文件
+        GengsShuZhiChanPinShaded(ePath,colorsPath,liaoningcityPath,gsPath,picPath, sttime,obsv );
+
+        //调用grADS软件,画色斑图
+        runGradsFile(gradsFile,gsPath);
+        File picFile=new File(picPath);
+        while(!picFile.exists()){
+            Thread.sleep(1000);
+        }
+
+        File gsFile=new File(gsPath);
+        if(gsFile.exists()){
+           gsFile.delete();
+        }
+
+        File pic=new File(picPath);
+        if(pic.exists()){
+            picPath=shuZhiChanPinPath+"Shuzhi"+time+".png";
+        } else{
+            picPath="";
+        }
+        String path=picPath.replace(imgPath,"/img/");
+        return path;
+    }
+
+    private static void GengsShuZhiChanPinShaded(String eraPath,String ColorsParh,String liaoningcityPath,String gsPath,String picPath,String time ,String obav) throws Exception
+    {
+        File file=new File(gsPath);
+        //使用更加普遍
+        PrintWriter out = new PrintWriter(file);
+        out.println("'reinit'");
+        out.println("'sdfopen "+eraPath+"'");
+        out.println("'set lon 118 126'");
+        out.println("'set lat 38.5 43.8'");
+        out.println("'set grid off'");
+        out.println("'set grads off'");
+        out.println("'set poli off'");
+        out.println("'set ylint 1'");
+        out.println("'set parea 0.4 10 0.6 8'");
+        out.println("'run "+ColorsParh+"'");
+        out.println("'set csmooth on'");
+        out.println("'set gxout shaded'");
+        if(obav.equals("气温")){
+            out.println("'d smth9(ave(t2m-273.15,t=1,t=24))' " );
+            out.println("'draw title 2 metre temperature'");
+        } if(obav.equals("气压")){
+            out.println("'d smth9(ave(sp,t=1,t=24))' " );
+            out.println("'draw title Surface pressure'");
+        }else if(obav.equals("10m风速")){
+            out.println("'d smth9(ave(v10,t=1,t=24))' " );
+            out.println("'draw title 10 metre V wind component'");
+        }
+        out.println("'cbarn 1 1 10.3 4.4' " );
+        out.println("'set line 1 1 2'");
+        out.println("'draw shp "+liaoningcityPath+"'");
+        //尺寸
+        out.println("'printim "+picPath+" png  x1200 y800 white'");
+        out.println("quit;");
+        out.flush();
         out.close();
     }
 
@@ -563,13 +659,15 @@ public class MakeGradsFile {
                     PeiSeClevs+=" ";
                 }
                 PeiSeClevs+=maxV;
+
+
             }
         }
         out.println("'set clevs "+PeiSeClevs+"'");
         out.println("'set ccols "+ccols+"'");
         out.println("'d val'");
         //数值叠加
-        Integer dataCount=0;//txt行数
+       /* Integer dataCount=0;//txt行数
         BufferedReader bufferedReader=new BufferedReader(new FileReader(textFilePath));
         while (bufferedReader.readLine()!=null){
             dataCount++;
@@ -588,7 +686,7 @@ public class MakeGradsFile {
         out.println("'draw String 'x' 'y' 'data''");
         out.println("i=i+1");
         out.println("endwhile");
-        out.println("ret=close('"+textFilePath+"')");
+        out.println("ret=close('"+textFilePath+"')");*/
         out.println("'printim "+picPath+" png x725 y683 white'");
         out.println("quit;");
         out.flush();

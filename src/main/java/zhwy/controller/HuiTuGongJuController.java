@@ -61,4 +61,33 @@ public class HuiTuGongJuController {
 			return "生成图片失败："+e.getMessage();
 		}
 	}
+	@PostMapping("/shuZhiChanPinPic")
+	@ApiOperation(value = "数值产品图")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="timeType",value="时间类型(日，月，季，年)",required=true,paramType="query",dataType="String"),
+			@ApiImplicitParam(name="time",value="颜色:[{\"colorMinValues\":\"0\",\"colorMaxValues\":\"18.5\",\"colorValues\":\"228,95,18\"},{\"colorMinValues\":\"18.6\",\"colorMaxValues\":\"19\",\"colorValues\":\"132,255,0\"},{\"colorMinValues\":\"19.1\",\"colorMaxValues\":\"19.5\",\"colorValues\":\"62,194,191\"},{\"colorMinValues\":\"19.6\",\"colorMaxValues\":\"21.5\",\"colorValues\":\"213,44,205\"},{},{}]",required=true,paramType="query",dataType="String"),
+			@ApiImplicitParam(name="dateType",value="数据类型（ERA,WRF）",required=true,paramType="query",dataType="String"),
+			@ApiImplicitParam(name="obsv",value="要素名称",required=true,paramType="query",dataType="String"),
+			@ApiImplicitParam(name="hig",value="高度（1000,500）",required=true,paramType="query",dataType="String")
+
+			})
+	public String shuZhiChanPinPic(String timeType, String time, String dateType,String obsv,String hig) throws Exception {
+
+		//跨域
+		common.getCrossOrigin();
+		String picName="";
+
+		try {
+			if("气温,气压,10m风速".indexOf(obsv)!=-1){
+				picName=huiTu.makeShuzhi(timeType,time,dateType,obsv,hig);
+			}else{
+				picName="生成图片失败，该要素暂无数据";
+			}
+			return   picName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("生成图片失败："+e.getMessage());
+			return "生成图片失败："+e.getMessage();
+		}
+	}
 }

@@ -239,17 +239,47 @@ public class ChanPinController {
             inputStream = new FileInputStream(file);
             document = new XWPFDocument(inputStream);
 
-
-            Iterator<XWPFParagraph> itPara = document.getParagraphsIterator();
             String classPath = "zhwy.PoiForFile.Section";
             String obsv="";
+            Iterator<XWPFTable> it = document.getTablesIterator();
+            //表格内容替换添加
+            while(it.hasNext()){
+                classPath = "zhwy.PoiForFile.SectionWin";
+                XWPFTable table = it.next();
+                int rcount = table.getNumberOfRows();
+                for(int i =0 ;i < rcount;i++){
+                    String [] Xarr=new String[]{ "风向频率" };
+                    XWPFTableRow row = table.getRow(i);
+                    List<XWPFTableCell> cells =  row.getTableCells();
+                    for (XWPFTableCell cell : cells){
+                        String celltext=cell.getText();
+                         String text=celltext.split("\\{")[1].split("\\}")[0];
+                        //cell.removeParagraph(0);
+                        BaseSection base = (BaseSection) Class.forName(classPath).newInstance();
+                        JSONArray array=chanPinService.getSectionData(text,stationType,beginTime,endTime,beginTime2,endTime2,stationNum,stationName);
+                        base.replaceChart(text,document,array,"年",Xarr,obsv);
+                        int l=cell.getParagraphs().size();
+                        for(int s=0;s<l;s++){
+                            int rs= cell.getParagraphs().get(s).getRuns().size();
+                            for (int m=0;m<rs;m++){
+                                String ren=cell.getParagraphs().get(s).getRuns().get(m).toString();
+                                if(ren.equals(celltext)){
+                                    cell.getParagraphs().get(s).removeRun(m);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
+            Iterator<XWPFParagraph> itPara = document.getParagraphsIterator();
             //处理文字
             while (itPara.hasNext()) {
                 XWPFParagraph paragraph = itPara.next();
                 String paraText = paragraph.getText();
                 //如果没有匹配到指定格式的关键词占位符（如${title}格式的）则不进行后续处理
-                if (!pattern.matcher(paraText).find()) {
+                 if (!pattern.matcher(paraText).find()) {
                     continue;
                 }
                 //提取出文档模板占位符中的章节标题
@@ -374,6 +404,7 @@ public class ChanPinController {
                 }
             }
 
+
             //再遍历一次文档,把没有替换的占位符段落删除
             List<IBodyElement> elements = document.getBodyElements();
             int indexTable = 0;
@@ -393,11 +424,14 @@ public class ChanPinController {
                 }
                 //如果是表格，那么给表格的前一个段落(即表名加上编号，如表1)
                 if (bodyElement.getElementType().equals(BodyElementType.TABLE)) {
-                    indexTable++;
                     XWPFParagraph tableTitleParagraph = (XWPFParagraph) elements.get(k - 1);
                     StringBuilder tableTitleText = new StringBuilder(tableTitleParagraph.getParagraphText());
-                    tableTitleText.insert(0, "表" + indexTable + " ");
-                    poiUtils.setTableOrChartTitle(tableTitleParagraph, tableTitleText.toString());
+                    if(tableTitleText.toString().indexOf("主导风向")==-1){
+                        indexTable++;
+                        tableTitleText.insert(0, "表" + indexTable + " ");
+                        poiUtils.setTableOrChartTitle(tableTitleParagraph, tableTitleText.toString());
+                     }
+
                 }
             }
 

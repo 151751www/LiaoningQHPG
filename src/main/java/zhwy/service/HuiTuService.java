@@ -145,4 +145,8 @@ public class HuiTuService {
 
 		return picPath;
 	}
+	public String makeShuzhi (String timeType, String time, String dateType,String obsv,String hig)throws Exception{
+		String picPath=mgf.drawShuZhiChanPinPic(timeType,time,dateType,obsv,hig);
+		return picPath;
+	}
 }
