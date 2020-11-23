@@ -93,6 +93,8 @@ public class ChanPinDaoImpl implements ChanPinDao {
         String Yeartable="";
         if(stationType.equals("国家站")){
             Yeartable="surf_aws_year_data";
+        }else if(stationType.equals("区域站")){
+            Yeartable="surf_reg_year_data";
         }
         String [] obsvVal={"tem_max","tem_min","rhu_min","PRE_Max_Day","EVP","win_s_max_year","FRS_Depth_Max","Snow_Depth_Max"};
         String [] obsvtime={"TEM_Max_otime","TEM_Min_otime","RHU_Min_Otime","PRE_Max_Mon_Otime","observe_date","win_s_max_year_otime","FRS_Depth_Max_Otime","Snow_Depth_Max_otime"};

@@ -465,13 +465,13 @@ public class MakeGradsFile {
         out.println("'set gxout shaded'");
         if(obav.equals("气温")){
             out.println("'d smth9(ave(t2m-273.15,t=1,t=24))' " );
-            out.println("'draw title 2 metre temperature'");
+            out.println("'draw title 2 metre temperature(`a。`nC)'");
         } if(obav.equals("气压")){
             out.println("'d smth9(ave(sp,t=1,t=24))' " );
-            out.println("'draw title Surface pressure'");
+            out.println("'draw title Surface pressure(Pa)'");
         }else if(obav.equals("10m风速")){
             out.println("'d smth9(ave(v10,t=1,t=24))' " );
-            out.println("'draw title 10 metre V wind component'");
+            out.println("'draw title 10 metre V wind component(m/s)'");
         }
         out.println("'cbarn 1 1 10.3 4.4' " );
         out.println("'set line 1 1 2'");

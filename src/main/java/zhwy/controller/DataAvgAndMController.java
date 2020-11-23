@@ -237,10 +237,10 @@ public class DataAvgAndMController {
             @ApiImplicitParam(name = "file",value = "单个序列文件，",paramType = "formData",required = true,dataType = "file"),
             @ApiImplicitParam(name = "dataType", value = "数据类型（时，日，年）", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "stationNum", value = "台站号(54236)", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "obsveName", value = "要素名称(平均气温，最高气温，...)", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "obsvName", value = "要素名称(平均气温，最高气温，...)", required = true, paramType = "query", dataType = "String")
 
     })
-    public String uploadSFile( MultipartFile file,String dataType,String  stationNum,String obsveName)  {
+    public String uploadSFile( MultipartFile file,String dataType,String  stationNum,String obsvName)  {
         //跨域
         common.getCrossOrigin();
         JSONObject jsObject=new JSONObject();
@@ -252,7 +252,7 @@ public class DataAvgAndMController {
             jsObject.put("失败","请选择短序列文件所属的台站");
             return jsObject.toJSONString() ;
         }
-        if(obsveName==null ||obsveName.equals("")){
+        if(obsvName==null ||obsvName.equals("")){
             jsObject.put("失败","请选择短序列文件表示的要素");
             return jsObject.toJSONString() ;
         }
@@ -270,7 +270,7 @@ public class DataAvgAndMController {
             jsonObjectafter=new JSONObject(true);
             jsonObjectafter.put("时间",jsonObjectbefor.get("时间"));
             jsonObjectafter.put("站号",stationNum);
-            jsonObjectafter.put("要素",obsveName);
+            jsonObjectafter.put("要素",obsvName);
             jsonObjectafter.put("短序列",jsonObjectbefor.get("短序列"));
             jsonArrayAfter.add(jsonObjectafter);
         }
@@ -471,6 +471,4 @@ public class DataAvgAndMController {
         }
         return  result;
     }
-
-
 }

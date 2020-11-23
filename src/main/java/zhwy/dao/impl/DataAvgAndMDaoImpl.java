@@ -10,7 +10,6 @@ import zhwy.util.Common;
 import zhwy.util.GeneralDaoImpl;
 
 import java.math.BigDecimal;
-import java.util.*;
 
 
 @Component
@@ -50,7 +49,20 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
             }
             stationTableName="meto_surf_aws_info";
         }else if(stationType.equals("区域站")){
-
+            if(dataType.equals("时")){
+                dataTableName="surf_reg_hour_data";
+                dnum=14;
+            }else if(dataType.equals("日")){
+                dataTableName="surf_reg_day_data";
+                dnum=11;
+            }else if(dataType.equals("月")){
+                dataTableName="surf_reg_month_data";
+                dnum=8;
+            }else  if(dataType.equals("年")){
+                dataTableName="surf_reg_year_data";
+                dnum=5;
+            }
+            stationTableName="meto_surf_reg_info";
         }
         if(value.indexOf("风速")>0){
             if(suanfaType.equals("极大值")||suanfaType.equals("极小值")){
@@ -177,28 +189,48 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         int dnum=0;
         if(stationType.equals("国家站")){
             stationTable="meto_surf_aws_info";
+            if (dataType.equals("时") )
+            {
+                SQLTableName = "surf_aws_hour_data";
+                dnum=14;
+            }
+            else if (dataType.equals("日") )
+            {
+                SQLTableName = "surf_aws_day_data";
+                dnum=11;
+            }
+            else if (dataType.equals("月"))
+            {
+                SQLTableName = "surf_aws_month_data";
+                dnum=8;
+
+            }else if(dataType.equals("年") ){
+                SQLTableName = "surf_aws_year_data";
+                dnum=5;
+            }
         }else if(stationType.equals("区域站")){
+            if (dataType.equals("时") )
+            {
+                SQLTableName = "surf_reg_hour_data";
+                dnum=14;
+            }
+            else if (dataType.equals("日") )
+            {
+                SQLTableName = "surf_reg_day_data";
+                dnum=11;
+            }
+            else if (dataType.equals("月"))
+            {
+                SQLTableName = "surf_reg_month_data";
+                dnum=8;
+
+            }else if(dataType.equals("年") ){
+                SQLTableName = "surf_reg_year_data";
+                dnum=5;
+            }
             stationTable="meto_surf_reg_info";
         }
-        if (dataType.equals("时") )
-        {
-            SQLTableName = "surf_aws_hour_data";
-            dnum=14;
-        }
-        else if (dataType.equals("日") )
-        {
-            SQLTableName = "surf_aws_day_data";
-            dnum=11;
-        }
-        else if (dataType.equals("月"))
-        {
-            SQLTableName = "surf_aws_month_data";
-            dnum=8;
 
-        }else if(dataType.equals("年") ){
-            SQLTableName = "surf_aws_year_data";
-            dnum=5;
-        }
         StringBuilder sql=new StringBuilder();
         sql.append("select meto.station_name as staname,surf.station_num as stanum,SUBSTRING(CONVERT (varchar(100),observe_date,120),0,"+dnum+") as time,"+obsveName+"  as data from  "+SQLTableName+" surf,"+stationTable+" meto" );
         sql.append(" where  surf.station_num=meto.station_num  and "+obsveName +" is not null  ");
@@ -296,20 +328,6 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         }
         return null;
     }
-
-    public List<Map<String,Object>> getChongXianDate(String obsv,String num,String startYear,String endYear){
-        List<Map<String,Object>> datelist=null;
-        StringBuffer sql=new StringBuffer();
-        sql.append("select "+obsv+" from surf_aws_year_data where station_num='"+num+"' and observe_date>='"+startYear+"' and observe_date<='"+endYear+"' and "+obsv+" is not null  order by observe_date asc");
-        try {
-            datelist=generalDao.getDataList(sql.toString());
-        }catch (Exception e){
-            logger.error("DataAvgAndMDaoImpl----getChongXianDate 获取重现期数据失败 "+e.getMessage());
-        }
-        return  datelist;
-    }
-
-
 
 
 }

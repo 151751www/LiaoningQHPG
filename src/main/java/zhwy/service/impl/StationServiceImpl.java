@@ -16,10 +16,10 @@ public class StationServiceImpl implements StationService {
     @Autowired
     public StationDao stationDao;
 
-    public  String  getCity(String  stationType)  {
+    public  String  getCity(String  stationType,String pageType)  {
         String result="";
         try {
-            result=stationDao.getCity(stationType);
+            result=stationDao.getCity(stationType,pageType);
         }catch (Exception e){
             logger.error("市名查询失败"+e.getMessage());
             result="市名查询失败"+e.getMessage();
@@ -27,10 +27,10 @@ public class StationServiceImpl implements StationService {
     return result;
     }
 
-    public String getCounty(String stationType, String city) {
+    public String getCounty(String stationType, String city,String pageType) {
         String result="";
         try {
-            result=stationDao.getCounty(stationType,city);
+            result=stationDao.getCounty(stationType,city,pageType);
         }catch (Exception e){
             logger.error("县名查询失败"+e.getMessage());
             result="县名查询失败"+e.getMessage();
@@ -38,10 +38,10 @@ public class StationServiceImpl implements StationService {
         return result;
 
     }
-    public String getRegStation(String stationType,String city, String cnty) {
+    public String getRegStation(String stationType,String city, String cnty,String pageType) {
         String result="";
         try {
-            result=stationDao.getStation(stationType,city,cnty);
+            result=stationDao.getStation(stationType,city,cnty,pageType);
         }catch (Exception e){
             logger.error("台站号查询失败"+e.getMessage());
             result="台站号查询失败"+e.getMessage();
@@ -61,4 +61,15 @@ public class StationServiceImpl implements StationService {
         }
         return result;
     }
+
+    public String checkFileName(String fileName) throws Exception {
+        String result="失败";
+        String Name[]=fileName.split("_");
+            Boolean  iiiii=stationDao.getstation(Name[0]);
+            if(iiiii){
+                result="成功";
+            }
+    return result;
+    }
+
 }

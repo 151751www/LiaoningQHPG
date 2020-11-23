@@ -2,6 +2,7 @@ package zhwy.controller;
 
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -71,23 +72,31 @@ public class HuiTuGongJuController {
 			@ApiImplicitParam(name="hig",value="高度（1000,500）",required=true,paramType="query",dataType="String")
 
 			})
-	public String shuZhiChanPinPic(String timeType, String time, String dateType,String obsv,String hig) throws Exception {
+	public String shuZhiChanPinPic(String timeType, String time, String dateType,String obsv,String hig) {
 
 		//跨域
 		common.getCrossOrigin();
+		JSONObject jsonObject=new JSONObject();
 		String picName="";
-
 		try {
 			if("气温,气压,10m风速".indexOf(obsv)!=-1){
 				picName=huiTu.makeShuzhi(timeType,time,dateType,obsv,hig);
+				if(picName.indexOf("失败")==-1){
+					jsonObject.put("status","成功");
+				}else{
+					jsonObject.put("status","失败");
+				}
 			}else{
 				picName="生成图片失败，该要素暂无数据";
+				jsonObject.put("status","失败");
 			}
-			return   picName;
+			jsonObject.put("message",picName);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("生成图片失败："+e.getMessage());
-			return "生成图片失败："+e.getMessage();
+			jsonObject.put("status","失败");
+			jsonObject.put("message","生成图片失败："+e.getMessage());
 		}
+		return jsonObject.toJSONString();
 	}
 }

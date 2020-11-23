@@ -65,41 +65,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         }
         return  message;
     }
-
-   /* public String  ChongxianqiCanshu(String obsv,String num,String startYear,String endYear){
-        ChongxianqiResult jsonResult=new ChongxianqiResult();
-        List<Map<String,Object>>datelist=dataAvgAndMDao.getChongXianDate(obsv,num,startYear,endYear);
-        List<Double> listValue=new ArrayList<Double>();
-        if (datelist.size()>0)
-        {
-            for (int i = 0; i < datelist.size(); i++)
-            {
-                double b=Double.parseDouble(datelist.get(i).get(obsv).toString());
-                listValue.add(b);
-            }
-        }
-        double[] arrShuju=new double[listValue.size()] ;
-        for (int i=0;i<listValue.size();i++){
-            arrShuju[i]=listValue.get(i);
-        }
-
-         ChongXianQIService getResult = new ChongXianQIService();
-        jsonResult.listShuJu = listValue;
-        jsonResult.dtCanShu = getResult.GetCanShuPNew(arrShuju);
-
-        double avgX = Double.parseDouble((jsonResult.dtCanShu.getRows().get(0).get("avgx")).toString());
-        double Cv = Double.parseDouble((jsonResult.dtCanShu.getRows().get(0).get("Cv")).toString());
-        double Cs_Cv = Double.parseDouble((jsonResult.dtCanShu.getRows().get(0).get("Cs_Cv")).toString());
-        double Cs = Double.parseDouble((jsonResult.dtCanShu.getRows().get(0).get("Cs")).toString());
-
-
-        jsonResult.dtP3DottedLine = getResult.GetP3LineNew(avgX, Cv, Cs_Cv);
-        jsonResult.dtP3BlackPoint = getResult.GetP3BlackPointNew(avgX, Cv, Cs_Cv, arrShuju);
-        String json = JSONObject.toJSONString(jsonResult);
-        return  json;
-    }
-
-    *//**
+/**
      *
      * @param rateStr X年一遇  逗号分隔
      * @param avgXC 修改的均值

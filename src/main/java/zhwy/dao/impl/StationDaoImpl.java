@@ -9,19 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import zhwy.dao.StationDao;
 import zhwy.util.GeneralDaoImpl;
+
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class StationDaoImpl implements StationDao {
     private static Logger logger = LoggerFactory.getLogger(StationDaoImpl.class);
     @Autowired
     private GeneralDaoImpl generalDao;
 
-    public String  getCity(String stationType)   {
+    public String  getCity(String stationType,String pageType)   {
         String sql;
         String result;
         String [] keys={"name"};
         JSONArray array = new JSONArray();
-        JSONObject object=new JSONObject();
-        object.put("name","全部");
+
 
         if(stationType.equals("国家站")){
             sql = "select   DISTINCT(city) as name from meto_surf_aws_info where  city is not null and  city!='' order by city";
@@ -32,7 +35,11 @@ public class StationDaoImpl implements StationDao {
         }
         try {
             array=generalDao.getDataBySql(sql,keys);
-            array.add(0,object);
+            if("重现期，序列订正延长,产品服务".indexOf(pageType)==-1){
+                JSONObject object=new JSONObject();
+                object.put("name","全部");
+                array.add(0,object);
+            }
             result=array.toString();
         }catch (Exception e){
             logger.error("市名查询失败"+e.getMessage());
@@ -42,7 +49,7 @@ public class StationDaoImpl implements StationDao {
     }
 
 
-    public String getCounty(String stationType, String city) {
+    public String getCounty(String stationType, String city,String pageType) {
         String sql;
         String result;
         String [] keys = new String[]{"name"};
@@ -61,10 +68,12 @@ public class StationDaoImpl implements StationDao {
             return result;
         }
         try {
-            JSONObject object=new JSONObject();
-            object.put("name","全部");
             array=generalDao.getDataBySql(sql,keys);
-            array.add(0,object);
+            if("重现期，序列订正延长,产品服务".indexOf(pageType)==-1){
+                JSONObject object=new JSONObject();
+                object.put("name","全部");
+                array.add(0,object);
+            }
             result=array.toString();
         }catch (Exception e){
             logger.error("县名查询失败"+e.getMessage());
@@ -73,7 +82,7 @@ public class StationDaoImpl implements StationDao {
         return result;
     }
 
-    public String getStation(String stationType, String city,String cnty) {
+    public String getStation(String stationType, String city,String cnty,String pageType) {
         String sql;
         String result;
         String [] keys = new String[]{"value","name"};
@@ -94,11 +103,13 @@ public class StationDaoImpl implements StationDao {
         sql="select station_num as value , station_name as name from "+tableName+" where 1=1  "+cityName +" order by station_num";
 
         try {
-            JSONObject object=new JSONObject();
-            object.put("name","全部");
-            object.put("value","");
             array=generalDao.getDataBySql(sql,keys);
-            array.add(0,object);
+            if("重现期，序列订正延长,产品服务".indexOf(pageType)==-1){
+                JSONObject object=new JSONObject();
+                object.put("name","全部");
+                object.put("value","");
+                array.add(0,object);
+            }
             result=array.toString();
         }catch (Exception e){
             logger.error("台站名称查询失败"+e.getMessage());
@@ -129,6 +140,20 @@ public class StationDaoImpl implements StationDao {
             result="地区编码查询失败"+e.getMessage();
         }
 
+        return result;
+    }
+
+    @Override
+    public Boolean getstation(String iiiii)throws Exception {
+        String sql="";
+        Boolean result= false;
+
+        sql="select station_name  from meto_surf_aws_info a where a.station_num='"+iiiii+"' " +
+                "union select station_name  from meto_surf_reg_info a where a.station_num='"+iiiii+"'";
+            List<Map<String,Object>> list=generalDao.getDataList(sql);
+            if(list.size()>0){
+                result=true;
+            }
         return result;
     }
 }

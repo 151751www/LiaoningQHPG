@@ -95,7 +95,7 @@ public class ChongXianQIService {
             xp[i]=bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留两位小数
         }
         jsonTable=new JSONObject(true);
-        for (int i=0;i<xp.length;i++){
+            for (int i=0;i<xp.length;i++){
             jsonObjectxp=new JSONObject(true);
            // jsonObjectxp.put("x_xp",x_xp[i]);
             arrayxp.add(i,jsonObjectxp);

@@ -25,7 +25,7 @@ public class DataMethodDaoImpl implements DataMethodDao {
         {
             SQLTableName = "surf_aws_hour_data";
             if(stationType.equals("区域站")){
-                SQLTableName = "surf_aws_hour_data";
+                SQLTableName = "surf_reg_hour_data";
             }
             beginTime = beginTime + ":00";
             endTime = endTime + ":00";
@@ -35,7 +35,7 @@ public class DataMethodDaoImpl implements DataMethodDao {
         {
             SQLTableName = "surf_aws_day_data";
             if(stationType.equals("区域站")){
-                SQLTableName = "surf_aws_hour_data";
+                SQLTableName = "surf_reg_hour_data";
             }
             beginTime = beginTime + " 00:00";
             endTime = endTime + " 23:00";
@@ -45,7 +45,7 @@ public class DataMethodDaoImpl implements DataMethodDao {
         {
             SQLTableName = "surf_aws_month_data";
             if(stationType.equals("区域站")){
-                SQLTableName = "surf_aws_hour_data";
+                SQLTableName = "surf_reg_hour_data";
             }
             beginTime = beginTime + "-01 00:00";
             endTime = endTime + "-01 23:00";
@@ -55,7 +55,7 @@ public class DataMethodDaoImpl implements DataMethodDao {
         {
             SQLTableName = "surf_aws_year_data";
             if(stationType.equals("区域站")){
-                SQLTableName = "surf_aws_hour_data";
+                SQLTableName = "surf_reg_hour_data";
             }
             beginTime = beginTime + "-01-01 00:00";
             endTime = endTime + "-12-31 23:00";
