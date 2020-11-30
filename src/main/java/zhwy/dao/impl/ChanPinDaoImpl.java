@@ -140,7 +140,14 @@ public class ChanPinDaoImpl implements ChanPinDao {
             if(map.size()>0){
                 time=strUtil.NullToSpace(String.valueOf(map.get(0).get("observe_time")));
                 if(obsvVal[i].equals("win_s_max_year")){
-                    String fengxiang=wind.ConvertWindDirNumberToText(Double.parseDouble(String.valueOf(map.get(0).get("value"))),Double.parseDouble(String.valueOf(map.get(0).get("win_d_s_max_c"))),16,false);
+                    String fengxiang;
+                    if(map.get(0).get("value")==null||map.get(0).get("win_d_s_max_c")==null){
+                        fengxiang="-";
+                    }else{
+                        fengxiang=wind.ConvertWindDirNumberToText(Double.parseDouble(String.valueOf(map.get(0).get("value"))),Double.parseDouble(String.valueOf(map.get(0).get("win_d_s_max_c"))),16,false);
+                    }
+                    //String fengxiang=wind.ConvertWindDirNumberToText(Double.parseDouble(String.valueOf(map.get(0).get(
+                    //        "value"))),Double.parseDouble(String.valueOf(map.get(0).get("win_d_s_max_c"))),16,false);
                     value=map.get(0).get("value")+danwei[i]+","+fengxiang;
                 }else{
                     value=map.get(0).get("value")+danwei[i];
