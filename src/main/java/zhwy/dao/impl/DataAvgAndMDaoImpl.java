@@ -1,6 +1,7 @@
 package zhwy.dao.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import zhwy.dao.DataAvgAndMDao;
 import zhwy.util.Common;
 import zhwy.util.GeneralDaoImpl;
+import zhwy.util.StrUtil;
 
 import java.math.BigDecimal;
 
@@ -33,6 +35,8 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         String stationTableName="";
         String  select="";
         int dnum=0;
+        JSONArray total=new JSONArray();
+        JSONObject jsonObject =new JSONObject();
         if(stationType.equals("国家站")){
             if(dataType.equals("时")){
                 dataTableName="surf_aws_hour_data";
@@ -162,9 +166,10 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
                         continue;
                     }
                 }
-                JSONArray total=new JSONArray();
-                 total.add(0,odanwei);
-                 total.add(1,rearr);
+                 jsonObject.put("status","OK");
+                 total.add(jsonObject);
+                 total.add(1,odanwei);
+                 total.add(2,rearr);
                  result=total.toJSONString();
              }catch (Exception e){
                  logger.error("DataAvgAndMDaoImpl 文件平均数查询失败"+e.getMessage());
@@ -176,6 +181,9 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
              }else if(dataTableName.equals("")){
                  result="数据类型不匹配";
              }
+         }
+         if(total.size()==0){
+             result=StrUtil.packageResult(result);
          }
         return result;
 
@@ -249,12 +257,20 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
             sql.append(" and meto.cnty='"+cnty+"'");
         }
         sql.append(" order by observe_date asc");
+        JSONArray json=new JSONArray();
         try {
-            JSONArray json = generalDao.getDataBySql(sql.toString(),new String[]{"staname","stanum","time","data"});
+            JSONArray json1 = generalDao.getDataBySql(sql.toString(),new String[]{"staname","stanum","time","data"});
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("status","OK");
+            json.add(jsonObject);
+            json.addAll(json1);
             result=json.toJSONString();
         }catch (Exception e){
             logger.error("DataAvgAndMDaoImpl----getquahi 趋势分析数据查询失败"+e.getMessage());
             result="DataAvgAndMDaoImpl 文件----getquahi  趋势分析数据查询失败"+e.getMessage();
+        }
+        if(json==null||json.size()==0){
+            result=StrUtil.packageResult(result);
         }
         return result;
     }

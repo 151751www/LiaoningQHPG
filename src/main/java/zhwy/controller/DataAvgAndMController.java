@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import zhwy.service.DataAvgAndMService;
 import zhwy.service.DataMethodService;
 import zhwy.util.Common;
+import zhwy.util.StrUtil;
 
 import java.net.URLDecoder;
 import java.text.ParseException;
@@ -106,6 +107,8 @@ public class DataAvgAndMController {
         }
         if(result.equals("")){
             result=dataAvgAndMService.getDataForAvg(stationType,dataType,Obsveval,ObsveName,StartTime,EndTime,city,stationNum,suanfaType,cnty);
+        }else{
+            result= StrUtil.packageResult(result);
         }
         return result;
     }
@@ -167,6 +170,8 @@ public class DataAvgAndMController {
 
         if(result.equals("")){
             result=dataAvgAndMService.getStationQUShi(stationType,dataType,obsveName,StartTime,EndTime,stationNum,city, cnty);
+        }else{
+            result=StrUtil.packageResult(result);
         }
         return result;
     }

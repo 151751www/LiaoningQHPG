@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import zhwy.dao.DataAvgAndMDao;
 import zhwy.service.DataAvgAndMService;
+import zhwy.util.StrUtil;
 
 import javax.annotation.Resource;
 
@@ -26,6 +27,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         }catch (Exception e){
             logger.error("DataAvgAndMService  文件中查询要素数据错误 ："+e);
             message="DataAvgAndMService  文件中查询要素数据错误 ";
+            message= StrUtil.packageResult(message);
         }
         return  message;
     }
@@ -37,6 +39,7 @@ public class DataAvgAndMServiceImpl implements DataAvgAndMService {
         }catch (Exception e){
             logger.error("DataAvgAndMService  文件中查询趋势单站数据错误 ："+e);
             message="DataAvgAndMService  文件中查询趋势单站数据错误 ";
+            message=StrUtil.packageResult(message);
         }
         return  message;
     }
