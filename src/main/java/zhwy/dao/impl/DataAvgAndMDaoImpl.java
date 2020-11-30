@@ -105,11 +105,11 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
          if(!dataTableName.equals("")&&!stationTableName.equals("")&&result.equals("")){
              if(suanfaType.equals("平均值")||suanfaType.equals("原始值")){
                          sqlData.append( "  FROM  " );
-                         sqlData.append( stationTableName+"   meto, " );
+                         sqlData.append( stationTableName+"   meto left join " );
                          sqlData.append( dataTableName+"   surf "  );
-                         sqlData.append( "  WHERE " );
+                         sqlData.append( "  on " );
                          sqlData.append( "  meto.station_num = surf.station_num "  );
-                         sqlData.append( "  AND surf.observe_date BETWEEN CONVERT (datetime, '"+StartTime+"',20) " );
+                         sqlData.append( "  where  surf.observe_date BETWEEN CONVERT (datetime, '"+StartTime+"',20) " );
                          sqlData.append( "  AND CONVERT (datetime, '"+EndTime+"',20) "+select );
                          if(suanfaType.equals("平均值")){
                              sqlData.append( "  GROUP BY "  );

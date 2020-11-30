@@ -38,21 +38,10 @@ public class MakeGradsFile {
      * @throws Exception
      */
     //程序所在路径
-    @Value("${gradsFile}")
-    String gradsFile;
-    //生成图片的路径
-    @Value("${saveFolder}")
-    String saveFolder;
-    //要展示的图片的路径
-    @Value("${showFolder}")
-    String showFolder;
-    //shpPath的路径
-    @Value("${shpPath}")
-    String shpPath;
     @Value("${imgPath}")
     String imgPath;
-    @Value("${shuZhiChanPinPath}")
-    String shuZhiChanPinPath;
+    @Value("${gradsFile}")
+    String gradsFile;
     @Value("${eraPath}")
     String eraPath;
     @Value("${colorsPath}")
@@ -62,7 +51,13 @@ public class MakeGradsFile {
 
 
 
+
+
+
+
+
     public String drawGeDianPic(double[][] arrValue,String latLonStr,String colorStr,String steps,JSONArray latLonJSON) throws Exception{
+        String saveFolder=imgPath+"grads/";
         /*//获取系统时间
         Date curDate = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -148,6 +143,8 @@ public class MakeGradsFile {
     }
 
     public String drawWindPic(String jsonStr,double[][] arrValue_Fs,double[][] arrValue_Fx,String latLonStr,String colorStr,String steps,JSONArray latLonJSON) throws Exception{
+        String saveFolder=imgPath+"grads/";
+        String showFolder=imgPath+"grads/";
         //获取系统时间
         Date curDate = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssddd");
@@ -397,6 +394,7 @@ public class MakeGradsFile {
     }
 
     public String drawShuZhiChanPinPic(String timeType, String sttime, String dateType,String obsv,String hig  ) throws Exception{
+        String shuZhiChanPinPath=imgPath+"shuzhi/";
         //获取系统时间
         Date curDate = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssddd");
@@ -410,19 +408,10 @@ public class MakeGradsFile {
         }
         String gsPath=shuZhiChanPinPath +"Shuzhi"+time+".gs";
         String picPath=shuZhiChanPinPath+ "Shuzhi"+time+".png";
-        String ePath="";
-        if(obsv.equals("气温")||obsv.equals("气压")){
-            ePath=eraPath+"temperaturePressure/"+sttime+".nc";
-        }else if(obsv.equals("10m风速")){
-            ePath=eraPath+"wind/"+sttime+".nc";
-        }
-        File efile=new File(ePath);
-        if(!efile.exists()){
-            return "生成图片失败，查不到该时间下的数据文件";
-        }
+
 
         //生成对应的gs文件
-        GengsShuZhiChanPinShaded(ePath,colorsPath,liaoningcityPath,gsPath,picPath, sttime,obsv );
+        GengsShuZhiChanPinShaded(eraPath,colorsPath,liaoningcityPath,gsPath,picPath, sttime,obsv,timeType );
 
         //调用grADS软件,画色斑图
         runGradsFile(gradsFile,gsPath);
@@ -446,37 +435,288 @@ public class MakeGradsFile {
         return path;
     }
 
-    private static void GengsShuZhiChanPinShaded(String eraPath,String ColorsParh,String liaoningcityPath,String gsPath,String picPath,String time ,String obav) throws Exception
+    private static void GengsShuZhiChanPinShaded(String eraPath,String ColorsParh,String liaoningcityPath,String gsPath,String picPath,String time ,String obav,String timeType) throws Exception
     {
+        String ePath="";
+        String colorsgs="";
+        String suanfa="";
+        String title="";
+        String obsv="";
+        if(obav.equals("气温")){
+            ePath=eraPath+"temperaturePressure/";
+            suanfa="ave(t2m-273.15,t=1,t=24)";
+            title=" 2 metre temperature";
+            colorsgs="Colors_Tmp_7color.gs";
+            obsv="t2m";
+        }else if(obav.equals("气压")){
+            ePath=eraPath+"temperaturePressure/";
+            suanfa="ave(sp,t=1,t=24)";
+            title=" Surface pressure(Pa)";
+            colorsgs="100colors.gs";
+            obsv="sp";
+        }else if(obav.equals("10m风速")){
+            ePath=eraPath+"wind/";
+            suanfa="ave(mag(u10,v10),t=1,t=24)";
+            title=" 10 metre wind gust(m/s)";
+            colorsgs="Colors_Wind.gs";
+            obsv="mag(u10,v10)";
+        }
+
         File file=new File(gsPath);
         //使用更加普遍
         PrintWriter out = new PrintWriter(file);
         out.println("'reinit'");
-        out.println("'sdfopen "+eraPath+"'");
-        out.println("'set lon 118 126'");
-        out.println("'set lat 38.5 43.8'");
-        out.println("'set grid off'");
-        out.println("'set grads off'");
-        out.println("'set poli off'");
-        out.println("'set ylint 1'");
-        out.println("'set parea 0.4 10 0.6 8'");
-        out.println("'run "+ColorsParh+"'");
-        out.println("'set csmooth on'");
-        out.println("'set gxout shaded'");
-        if(obav.equals("气温")){
-            out.println("'d smth9(ave(t2m-273.15,t=1,t=24))' " );
-            out.println("'draw title 2 metre temperature(`a。`nC)'");
-        } if(obav.equals("气压")){
-            out.println("'d smth9(ave(sp,t=1,t=24))' " );
-            out.println("'draw title Surface pressure(Pa)'");
-        }else if(obav.equals("10m风速")){
-            out.println("'d smth9(ave(v10,t=1,t=24))' " );
-            out.println("'draw title 10 metre V wind component(m/s)'");
+        if(timeType.equals("日")){
+            out.println("'sdfopen "+ePath+time.substring(0,4)+"/"+time+".nc'");
+            out.println("'set lon 118 126'");
+            out.println("'set lat 38.5 43.8'");
+            out.println("'set grid off'");
+            out.println("'set grads off'");
+            out.println("'set poli off'");
+            out.println("'set ylint 1'");
+            out.println("'set parea 0.4 10 0.6 8'");
+            out.println("'run "+ColorsParh+colorsgs+"'");
+            out.println("'set csmooth on'");
+            out.println("'set gxout shaded'");
+            out.println("'d smth9("+suanfa+")' " );
+        }else if(timeType.equals("月")){
+            int days=30;
+            int year=Integer.parseInt(time.substring(0,4));
+            int month=Integer.parseInt(time.substring(-2));
+            if(month==1||month==3||month==5||month==7||month==8||month==10||month==12){
+                days=31;
+            }else if(month==2){
+                if(year%4==0&&year%100!=0||year%400==0){
+                    days=29;
+                }else{
+                    days=29;
+                }
+            }else {
+                days=30;
+            }
+            String it1="";
+            String itx="";
+            for (int i=1;i<=days;i++){
+                if(obsv.equals("气温")){
+                    it1+=obsv+"."+i+"-273(t=1)+";
+                    itx+=obsv+"."+i+"-273(t='it')+";
+                }else{
+                    it1+=obsv+"."+i+"(t=1)+";
+                    itx+=obsv+"."+i+"(t='it')+";
+                }
+            }
+            it1=it1.substring(0,it1.length()-1);
+            itx=itx.substring(0,itx.length()-1);
+            int hour=24*days;
+            out.println("day =1");
+            out.println("while (day<"+days+")");
+            out.println("if(day<10)");
+            out.println("'sdfopen "+ePath+year+"/"+time+"0'day'.nc'");
+            out.println("else");
+            out.println("'sdfopen "+ePath+year+"/"+time+"'day'.nc'");
+            out.println("endif");
+            out.println("day=day+1");
+            out.println("'endwhile'");
+            out.println("'set lon 118 126'");
+            out.println("'set lat 38.5 43.8'");
+            out.println("'set grid off'");
+            out.println("'set grads off'");
+            out.println("'set poli off'");
+            out.println("'set ylint 1'");
+            out.println("'set parea 0.4 10 0.6 8'");
+            out.println("'run "+ColorsParh+colorsgs+"'");
+            out.println("'set csmooth on'");
+            out.println("'set gxout shaded'");
+            out.println("'define hgt="+it1+"'");
+            out.println("it = 2");
+            out.println("while(it<=24)");
+            out.println("'set t 'it''");
+            out.println("'define hgt2="+itx+"'");
+            out.println("'hgt=hgt+hgt2'");
+            out.println("it=it+1");
+            out.println("endwhile");
+            out.println("'d hgt/"+hour+"'");
+        }else if(timeType.equals("年")){
+            int days=365;
+            int twoDays=28;
+            int year=Integer.parseInt(time.substring(0,4));
+            if(year%4==0&&year%100!=0||year%400==0){
+                days=366;
+                twoDays=29;
+            }
+            String it1="";
+            String itx="";
+            for (int i=1;i<=days;i++){
+                if(obsv.equals("气温")){
+                    it1+=obsv+"."+i+"-273(t=1)+";
+                    itx+=obsv+"."+i+"-273(t='it')+";
+                }else{
+                    it1+=obsv+"."+i+"(t=1)+";
+                    itx+=obsv+"."+i+"(t='it')+";
+                }
+            }
+            it1=it1.substring(0,it1.length()-1);
+            itx=itx.substring(0,itx.length()-1);
+            int hour=24*days;
+            out.println("month =1");
+            out.println("while (month<12)");
+            out.println("    day =1");
+            out.println("days = 1");
+            out.println(" if(month!=2)");
+            out.println("  if(month=1|month=3|month=5|month=7|month=8|month=10|month=12)");
+            out.println("      days = 31");
+            out.println("  else ");
+            out.println("      days = 30");
+            out.println("endif");
+            out.println(" else");
+            out.println(" days = "+twoDays+"");
+            out.println(" endif");
+            out.println("while (day<days)");
+            out.println("if(month<10)");
+            out.println("if(day<10)");
+            out.println("'sdfopen "+ePath+year+"/"+time+"0'month'"+"0'day'.nc'");
+            out.println("else");
+            out.println("'sdfopen "+ePath+year+"/"+time+"0'month'"+"'day'.nc'");
+            out.println("endif");
+            out.println("else");
+            out.println("if(day<10)");
+            out.println("'sdfopen "+ePath+year+"/"+time+"'month'"+"0'day'.nc'");
+            out.println("else");
+            out.println("'sdfopen "+ePath+year+"/"+time+"'month'"+"'day'.nc'");
+            out.println("endif");
+            out.println("endif");
+            out.println("day=day+1");
+            out.println("'endwhile'");
+            out.println("month=month+1");
+            out.println("'endwhile'");
+            out.println("'set lon 118 126'");
+            out.println("'set lat 38.5 43.8'");
+            out.println("'set grid off'");
+            out.println("'set grads off'");
+            out.println("'set poli off'");
+            out.println("'set ylint 1'");
+            out.println("'set parea 0.4 10 0.6 8'");
+            out.println("'run "+ColorsParh+colorsgs+"'");
+            out.println("'set csmooth on'");
+            out.println("'set gxout shaded'");
+            out.println("'define hgt="+it1+"'");
+            out.println("it = 2");
+            out.println("while(it<=24)");
+            out.println("'set t 'it''");
+            out.println("'define hgt2="+itx+"'");
+            out.println("'hgt=hgt+hgt2'");
+            out.println("it=it+1");
+            out.println("endwhile");
+            out.println("'d hgt/"+hour+"'");
+        }else if(timeType.equals("季")){
+            int days=0;
+            int twoDays=28;
+            int monthend=0;
+            int monthstart=0;
+            int year=Integer.parseInt(time.substring(0,4));
+            int lastyear=year-1;
+            if(year%4==0&&year%100!=0||year%400==0){
+                days=366;
+                twoDays=29;
+            }
+            if(time.substring(-1).endsWith("1")){
+                days=31+twoDays+31;
+                monthend=2;
+                monthstart=1;
+            }else if(time.substring(-1).endsWith("2")){
+                days=31+30+31;
+                monthend=5;
+                monthstart=3;
+            }else if(time.substring(-1).endsWith("3")){
+                days=30+31+31;
+                monthend=8;
+                monthstart=6;
+            }else if(time.substring(-1).endsWith("4")){
+                days=30+31+30;
+                monthend=11;
+                monthstart=9;
+            }
+            String it1="";
+            String itx="";
+            for (int i=1;i<=days;i++){
+                if(obsv.equals("气温")){
+                    it1+=obsv+"."+i+"-273(t=1)+";
+                    itx+=obsv+"."+i+"-273(t='it')+";
+                }else{
+                    it1+=obsv+"."+i+"(t=1)+";
+                    itx+=obsv+"."+i+"(t='it')+";
+                }
+            }
+            it1=it1.substring(0,it1.length()-1);
+            itx=itx.substring(0,itx.length()-1);
+            int hour=24*days;
+            if(time.substring(-1).endsWith("1")){
+                out.println("    day12 =1");
+                out.println("while (day12<31)");
+                out.println("if(day12<10)");
+                out.println("'sdfopen "+ePath+lastyear+"/"+lastyear+"120'day12'.nc'");
+                out.println("else");
+                out.println("'sdfopen "+ePath+lastyear+"/"+lastyear+"12'day12'.nc'");
+                out.println("endif");
+                out.println("day=day+1");
+                out.println("'endwhile'");
+            }
+            out.println("month ="+monthstart);
+            out.println("while (month<="+monthend+")");
+            out.println("    day =1");
+            out.println("days = 1");
+            out.println(" if(month!=2)");
+            out.println("  if(month=1|month=3|month=5|month=7|month=8|month=10|month=12)");
+            out.println("      days = 31");
+            out.println("  else ");
+            out.println("      days = 30");
+            out.println("endif");
+            out.println(" else");
+            out.println(" days = "+twoDays);
+            out.println(" endif");
+            out.println("while (day<days)");
+            out.println("if(month<10)");
+            out.println("if(day<10)");
+            out.println("'sdfopen "+ePath+year+"/"+year+"0'month'"+"0'day'.nc'");
+            out.println("else");
+            out.println("'sdfopen "+ePath+year+"/"+year+"0'month'"+"'day'.nc'");
+            out.println("endif");
+            out.println("else");
+            out.println("if(day<10)");
+            out.println("'sdfopen "+ePath+year+"/"+year+"'month'"+"0'day'.nc'");
+            out.println("else");
+            out.println("'sdfopen "+ePath+year+"/"+year+"'month'"+"'day'.nc'");
+            out.println("endif");
+            out.println("endif");
+            out.println("day=day+1");
+            out.println("'endwhile'");
+            out.println("month=month+1");
+            out.println("'endwhile'");
+            out.println("'set lon 118 126'");
+            out.println("'set lat 38.5 43.8'");
+            out.println("'set grid off'");
+            out.println("'set grads off'");
+            out.println("'set poli off'");
+            out.println("'set ylint 1'");
+            out.println("'set parea 0.4 10 0.6 8'");
+            out.println("'run "+ColorsParh+colorsgs+"'");
+            out.println("'set csmooth on'");
+            out.println("'set gxout shaded'");
+            out.println("'define hgt="+it1+"'");
+            out.println("it = 2");
+            out.println("while(it<=24)");
+            out.println("'set t 'it''");
+            out.println("'define hgt2="+itx+"'");
+            out.println("'hgt=hgt+hgt2'");
+            out.println("it=it+1");
+            out.println("endwhile");
+            out.println("'d hgt/"+hour+"'");
+
         }
+        out.println("'draw title"+title+"'");
         out.println("'cbarn 1 1 10.3 4.4' " );
         out.println("'set line 1 1 2'");
         out.println("'draw shp "+liaoningcityPath+"'");
-        //尺寸
         out.println("'printim "+picPath+" png  x1200 y800 white'");
         out.println("quit;");
         out.flush();
@@ -703,7 +943,7 @@ public class MakeGradsFile {
      * @throws Exception
      */
     public String drawYuanDianPic(String latLonStr,String time,int dataCount) throws Exception{
-
+        String saveFolder=imgPath+"grads/";
         File f = new File(saveFolder);
         if(!f.exists()&&!f.isDirectory()){
             f.mkdir();
@@ -747,7 +987,7 @@ public class MakeGradsFile {
 
     private boolean GetYuanDianGs(String MaxLon,String MinLon,String MaxLat,String MinLat,String gsFilePath,String txtFilePath,String picPath,int dataCount)
     {
-
+        String shpPath=imgPath+"makePic/";
         boolean isSuccess=false;
         File file=new File(gsFilePath);
         String PeiSeClevs="";//自定义配色的等级分段
@@ -842,6 +1082,7 @@ public class MakeGradsFile {
      * @throws Exception 异常
      */
     public boolean getTxt(JSONArray jsonData,String time,String colLonName,String colLatName,String yaosu){
+        String saveFolder=imgPath+"grads/";
         String txt = saveFolder +time +"Station.txt";
         boolean isSuccess=false;
         File file=new File(txt);

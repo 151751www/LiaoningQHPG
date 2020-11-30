@@ -66,7 +66,7 @@ public class HuiTuGongJuController {
 	@ApiOperation(value = "数值产品图")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="timeType",value="时间类型(日，月，季，年)",required=true,paramType="query",dataType="String"),
-			@ApiImplicitParam(name="time",value="颜色:[{\"colorMinValues\":\"0\",\"colorMaxValues\":\"18.5\",\"colorValues\":\"228,95,18\"},{\"colorMinValues\":\"18.6\",\"colorMaxValues\":\"19\",\"colorValues\":\"132,255,0\"},{\"colorMinValues\":\"19.1\",\"colorMaxValues\":\"19.5\",\"colorValues\":\"62,194,191\"},{\"colorMinValues\":\"19.6\",\"colorMaxValues\":\"21.5\",\"colorValues\":\"213,44,205\"},{},{}]",required=true,paramType="query",dataType="String"),
+			@ApiImplicitParam(name="time",value="时间:2020年1季度,202002，20200205，2020",required=true,paramType="query",dataType="String"),
 			@ApiImplicitParam(name="dateType",value="数据类型（ERA,WRF）",required=true,paramType="query",dataType="String"),
 			@ApiImplicitParam(name="obsv",value="要素名称",required=true,paramType="query",dataType="String"),
 			@ApiImplicitParam(name="hig",value="高度（1000,500）",required=true,paramType="query",dataType="String")

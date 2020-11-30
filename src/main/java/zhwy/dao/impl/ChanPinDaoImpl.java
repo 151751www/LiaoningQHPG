@@ -26,6 +26,8 @@ public class ChanPinDaoImpl implements ChanPinDao {
         String Yeartable="" ;
         if(stationType.equals("国家站")){
             Yeartable="surf_aws_year_data";
+        }else {
+            Yeartable="surf_reg_year_data";
         }
         String [] obsvVal={"tem","tem_max","tem_min","prs","pre","win_s","win_f","vap","rhu","gst","gst_80","gst_160","gst_320"};
         String [] obsvName={"气温（℃）","平均最高气温（℃）","平均最低气温（℃）","气压（hPa）","降水量（mm）","风速（m/s）","主导风向","水汽压（hPa）","相对湿度（%）","地表温度（℃）","0.8m地温（℃）","1.6m地温（℃）","3.2m地温（℃）"};

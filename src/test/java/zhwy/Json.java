@@ -1,11 +1,17 @@
 package zhwy;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +48,7 @@ public class Json {
         itemH.put("evp_big", "大型蒸发量");
 
         itemH.put("win_s_avg_2mi", "2分钟平均风速");
-        itemH.put("win_d_10mi", "10分钟平均风速");
+        itemH.put("win_s_avg_10mi", "10分钟平均风速");
         itemH.put("win_s_max", "最大风速");
         itemH.put("win_s_inst_max", "极大风速");
         itemH.put("win_s_inst", "瞬时风速");
@@ -151,8 +157,6 @@ public class Json {
         itemM.put("tem_avg", "平均气温");
         itemM.put("tem_max", "最高气温");
         itemM.put("tem_min", "最低气温");
-        itemM.put("tem_max_avg","平均最高气温");
-        itemM.put("tem_min_avg","平均最低气温");
 
         itemM.put("vap_avg", "平均水汽压");
 
@@ -165,29 +169,24 @@ public class Json {
         itemM.put("vis_min", "最小水平能见度");
 
         itemM.put("pre_max_1h", "1小时最大降水量");
-        itemM.put("pre_max_day","最大日降水量");
-        itemM.put("pre_conti_max","最长连续降水量");
-        itemM.put("pre_max_conti","最大连续降水量");
+        itemM.put("pre_time_2008", "20-08时降水量");
+        itemM.put("pre_time_0820", "08-20时降水量");
         itemM.put("pre_time_2020", "20-20时降水量");
         itemM.put("pre_time_0808", "08-08时降水量");
 
-        itemM.put("evp","蒸发量");
+        itemM.put("evp_small","小型蒸发量");
         itemM.put("evp_big", "大型蒸发量");
 
-        itemM.put("snow_depth_max", "最大积雪深度");
+        itemM.put("snow_depth", "最大积雪深度");
         itemM.put("snow_prs", "雪压");
 
-        itemM.put("eice_wei_max","电线积冰最大重量");
-        itemM.put("eicew_max_diam","电线积冰最大重量的相应直径");
-        itemM.put("eicew_max_thick","电线积冰最大重量的相应厚度");
 
         itemM.put("win_s_2mi_avg", "平均2分钟风速");
+        itemM.put("win_s_10mi_avg", "平均10分钟风速");
         itemM.put("win_s_max", "最大风速");
         itemM.put("win_s_inst_max", "极大风速");
 
         itemM.put("gst_avg", "平均地面温度");
-        itemM.put("egst_max_avg_mon","月平均最高地面温度");
-        itemM.put("gst_min_avg","月平均最低地面温度");
         itemM.put("gst_max", "最高地面温度");
         itemM.put("gst_min", "最低地面温度");
 
@@ -204,9 +203,7 @@ public class Json {
 
         itemM.put("ssh", "日照时数");
 
-        itemM.put("lgst_avg", "草面（雪面）温度");
-        itemM.put("lgst_max_avg", "平均最高草面(雪面)温度");
-        itemM.put("lgst_min_avg", "平均最低草面(雪面)温度");
+        itemM.put("lgst_avg", "平均草面(雪面)温度");
         itemM.put("lgst_max", "草面（雪面）最高温度");
         itemM.put("lgst_min", "草面（雪面）最低温度");
 
@@ -215,44 +212,45 @@ public class Json {
         itemY.put("prs_avg", "平均气压");
         itemY.put("prs_max", "最高气压");
         itemY.put("prs_min", "最低气压");
+        itemY.put("prs_sea_avg", "平均海平面气压");
 
         itemY.put("tem_avg", "平均气温");
-        itemY.put("tem_avg_max", "年均最高气温");
-        itemY.put("tem_avg_min", "年均最低气温");
-        itemY.put("tem_max", "年极端最高气温");
-        itemY.put("tem_min", "年极端最低气温");
+        itemY.put("tem_avg_max", "平均最高气温");
+        itemY.put("tem_avg_min", "平均最低气温");
+        itemY.put("tem_max", "最高气温");
+        itemY.put("tem_min", "最低气温");
 
         itemY.put("vap_avg", "平均水汽压");
-        itemY.put("vap_max", "最大水汽压");
-        itemY.put("vap_min", "最小水汽压");
-
 
         itemY.put("rhu_avg", "平均相对湿度");
         itemY.put("rhu_min", "最小相对湿度");
 
-        itemY.put("clo_cov_avg", "年均总云量");
-        itemY.put("clo_cov_low_avg", "年均低云量");
+        itemY.put("clo_cov_avg", "平均总云量");
+        itemY.put("clo_cov_low_avg", "平均低云量");
 
 
         itemY.put("pre_1m", "年降水量");
+        itemY.put("pre_max_1h", "1小时最大降水量");
+        itemY.put("pre_time_2020", "20-20时降水量");
+        itemM.put("pre_time_0808", "08-08时降水量");
 
 
-        itemY.put("evp_small", "小型蒸发量");
+        itemY.put("evp", "蒸发量");
         itemY.put("evp_big", "大型蒸发量");
 
-        itemY.put("snow_depth_max", "年最大积雪深度");
+        itemY.put("snow_depth_max", "最大积雪深度");
+        itemY.put("snow_prs", "最大积雪深度");
 
         itemY.put("win_s_2mi_avg", "平均2分钟风速");
-        itemY.put("win_s_10mi_avg", "平均10分钟风速");
         itemY.put("win_s_max", "最大风速");
         itemY.put("win_s_inst_max", "极大风速");
         itemY.put("win_s_tim", "定时风速");
 
         itemY.put("gst_avg", "平均地面温度");
-        itemY.put("gst_avg_max","年均最高地面温度");
-        itemY.put("gst_avg_min","年均最低地面温度");
-        itemY.put("gst_max", "年极端最高地面温度");
-        itemY.put("gst_min", "年极端最低地面温度");
+        itemY.put("egst_max_avg_mon","平均最高地面温度");
+        itemY.put("gst_avg_min","平均最低地面温度");
+        itemY.put("gst_max", "最高地面温度");
+        itemY.put("gst_min", "最低地面温度");
 
         itemY.put("gst_avg_5cm", "平均5cm地温");
         itemY.put("gst_avg_10cm", "平均10cm地温");
@@ -263,6 +261,14 @@ public class Json {
         itemY.put("gst_avg_160cm", "平均160cm地温");
         itemY.put("gst_avg_320cm", "平均320cm地温");
 
+        itemY.put("lgst_avg", "平均草面(雪面)温度");
+        itemY.put("lgst_max_avg", "草面（雪面）最高温度");
+        itemY.put("lgst_min", "草面（雪面）最低温度");
+        itemY.put("lgst_max", "草面（雪面）最高温度");
+        itemY.put("lgst_min", "草面（雪面）最低温度");
+
+
+
         itemY.put("frs_depth_max", "最大冻土深度");
 
         itemY.put("ssh", "日照时数");
@@ -271,7 +277,7 @@ public class Json {
 
 
 
-    /*public static void main(String[] args) {
+    public static void main(String[] args) {
 
         String fullPath = null;
         //例如：fullPath="D:/myroot/test.json"
@@ -297,7 +303,6 @@ public class Json {
             String [] yearObsv={"气压","水汽压","气温","相对湿度","云","降水量","蒸发量","风","地温","冻土","雪深","日照"};
             String [] yearKey={"prs","vap","tem","rhu","clo","pre","evp","win","gst","frs","snow","ssh"};
 
-            Common common=new Common();
             Map<String,String> obsvMap=null;
             JSONObject rootH = new JSONObject(true);
             JSONObject rootD = new JSONObject(true);
@@ -364,8 +369,8 @@ public class Json {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
-    public static void main(String[] args)  {
+    }
+  /*  public static void main(String[] args)  {
         try {
             writeExcelWithFormula("Formulas.xlsx");
         }catch (Exception e){
@@ -373,7 +378,7 @@ public class Json {
         }
 
     }
-
+*/
 
 
         public static void writeExcelWithFormula(String fileName) {

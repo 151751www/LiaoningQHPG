@@ -157,6 +157,9 @@ public class StationController {
                     jsonObject.put("obsv",Names[1]);
                     jsonObject.put("timeType",type);
                     jsonObject.put("message","");
+                }else{
+                    jsonObject.put("status","成功");
+                    jsonObject.put("message","文件名不能识别");
                 }
             }
 

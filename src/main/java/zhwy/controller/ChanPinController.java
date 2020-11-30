@@ -50,11 +50,13 @@ public class ChanPinController {
     @Autowired
     private PoiUtils poiUtils;
 
-    @Value("${saveFolder}")
-    String saveFolder;
-
+    @Value("${imgPath}")
+    String imgPath;
     @Value("${wordpath}")
     String wordpath;
+
+
+
 
 
 
@@ -227,6 +229,7 @@ public class ChanPinController {
             @ApiImplicitParam(name = "stationName", value = "台站名", required = true, paramType = "query", dataType = "String")
     })
     public String FileMake(String stationType,String beginTime,String endTime,String beginTime2,String endTime2,String stationNum,String stationName){
+        String saveFolder=imgPath+"grads/";
         common.getCrossOrigin();
         Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}", Pattern.CASE_INSENSITIVE);
         XWPFDocument document = null;
