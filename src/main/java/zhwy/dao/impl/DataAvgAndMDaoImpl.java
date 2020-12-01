@@ -36,7 +36,6 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         String  select="";
         int dnum=0;
         JSONArray total=new JSONArray();
-        JSONObject jsonObject =new JSONObject();
         if(stationType.equals("国家站")){
             if(dataType.equals("时")){
                 dataTableName="surf_aws_hour_data";
@@ -166,10 +165,8 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
                         continue;
                     }
                 }
-                 jsonObject.put("status","OK");
-                 total.add(jsonObject);
-                 total.add(1,odanwei);
-                 total.add(2,rearr);
+                 total.add(0,odanwei);
+                 total.add(1,rearr);
                  result=total.toJSONString();
              }catch (Exception e){
                  logger.error("DataAvgAndMDaoImpl 文件平均数查询失败"+e.getMessage());
@@ -259,11 +256,7 @@ public class DataAvgAndMDaoImpl implements DataAvgAndMDao {
         sql.append(" order by observe_date asc");
         JSONArray json=new JSONArray();
         try {
-            JSONArray json1 = generalDao.getDataBySql(sql.toString(),new String[]{"staname","stanum","time","data"});
-            JSONObject jsonObject=new JSONObject();
-            jsonObject.put("status","OK");
-            json.add(jsonObject);
-            json.addAll(json1);
+            json = generalDao.getDataBySql(sql.toString(),new String[]{"staname","stanum","time","data"});
             result=json.toJSONString();
         }catch (Exception e){
             logger.error("DataAvgAndMDaoImpl----getquahi 趋势分析数据查询失败"+e.getMessage());
