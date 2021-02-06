@@ -143,6 +143,9 @@ public class WinTaskUtil {
         //根据开始时间获取月，日 yyyy-MM-dd HH:mm:ss
         String month=startTime.substring(5,7);
         String day=startTime.substring(8,10);
+        if(Integer.parseInt(day)>28){
+            day="28";
+        }
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date now =new Date();
 
@@ -156,11 +159,10 @@ public class WinTaskUtil {
         sb.append(System.getProperty("user.name"));//添加当前电脑用户
         sb.append("</Author>\n" +
                 "  </RegistrationInfo>\n" +
-                "  <Triggers>\n" +
-                "    <CalendarTrigger>");
+                "  <Triggers>\n" );
         //分钟和小时特有部分 根据重复间隔设置几分钟或几小时
         if("分".equals(dateType)||"小时".equals(dateType)){
-            sb.append("<Repetition>\n" +
+            sb.append( "<TimeTrigger>\n<Repetition>\n" +
                     "        <Interval>PT");
             sb.append(repeatInterval);//设置几分钟或几小时
             if("分".equals(dateType)){
@@ -169,21 +171,42 @@ public class WinTaskUtil {
                 sb.append("H");
             }
             sb.append("</Interval>\n" +
-                    "        <Duration>P1D</Duration>\n" +
-                    "        <StopAtDurationEnd>false</StopAtDurationEnd>\n" +
-                    "      </Repetition>");
+                    " <StopAtDurationEnd>false</StopAtDurationEnd>\n" +
+                    " </Repetition>");
+            sb.append("<StartBoundary>");
+            sb.append(startTime.replace(" ","T"));
+            sb.append("</StartBoundary>\n<EndBoundary>");
+            sb.append(stopTime.replace(" ","T"));
+            sb.append("</EndBoundary>\n" +
+                    "      <Enabled>true</Enabled>\n" +
+                    "</TimeTrigger>\n");
+        }else if("日".equals(dateType)){
+            sb.append( "<CalendarTrigger>\n" +
+                    "<StartBoundary>");
+            sb.append(startTime.replace(" ","T"));
+            sb.append("</StartBoundary>\n<EndBoundary>");
+            sb.append(stopTime.replace(" ","T"));
+            sb.append("</EndBoundary>\n" +
+                    "      <Enabled>true</Enabled>\n" +
+                    "<ScheduleByDay>\n" +
+                    " <DaysInterval>");
+            sb.append(repeatInterval);//重复间隔
+            sb.append("</DaysInterval>\n" +
+                    "      </ScheduleByDay>\n" +
+                    "</CalendarTrigger>\n");
         }
-        sb.append("<StartBoundary>");
-        sb.append(startTime.replace(" ","T"));
-        sb.append("</StartBoundary>\n<EndBoundary>");
-        sb.append(stopTime.replace(" ","T"));
-        sb.append("</EndBoundary>\n" +
-                "      <Enabled>true</Enabled>\n");
         //默认每月1日执行一次  年就是一年执行12次
-        if("月".equals(dateType)||"年".equals(dateType)){
-            sb.append("<ScheduleByMonth>\n" +
-                    "        <DaysOfMonth>\n" +
-                    "          <Day>");
+        else if("月".equals(dateType)||"年".equals(dateType)){
+            sb.append( "<CalendarTrigger>\n" +
+                    "<StartBoundary>");
+            sb.append(startTime.replace(" ","T"));
+            sb.append("</StartBoundary>\n<EndBoundary>");
+            sb.append(stopTime.replace(" ","T"));
+            sb.append("</EndBoundary>\n" +
+                    "      <Enabled>true</Enabled>\n"+
+                    "<ScheduleByMonth>\n" +
+                    "<DaysOfMonth>\n" +
+                    " <Day>");
             sb.append(day);
             sb.append("</Day>\n" +
                     "        </DaysOfMonth>\n" +
@@ -207,24 +230,10 @@ public class WinTaskUtil {
                 sb.append("/>\n");
             }
             sb.append(" </Months>\n" +
-                    "      </ScheduleByMonth>");
-        }else{
-            sb.append("<ScheduleByDay>\n" +
-                    "<DaysInterval>");
-
-            //小时和分钟设置1日，以日为重复间隔单位，根据重复间隔设置
-            if("分".equals(dateType)||"小时".equals(dateType)||"天".equals(dateType)){
-                if("天".equals(dateType)){
-                    sb.append(repeatInterval);
-                }else{
-                    sb.append("1");
-                }
-            }
-            sb.append("</DaysInterval>\n" +
-                    "      </ScheduleByDay>\n");
+                    "      </ScheduleByMonth>\n" +
+                    "</CalendarTrigger>");
         }
-        sb.append("    </CalendarTrigger>\n" +
-                "  </Triggers>\n" +
+        sb.append("  </Triggers>\n" +
                 "  <Principals>\n" +
                 "    <Principal id=\"Author\">\n" +
                 "      <UserId>");
